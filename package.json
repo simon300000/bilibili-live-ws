@@ -1,0 +1,29 @@
+{
+  "name": "bilibili-live-ws",
+  "version": "1.0.0",
+  "description": "Bilibili Live WebSocket API",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/simon300000/bilibili-live-ws.git"
+  },
+  "keywords": [
+    "bilibili",
+    "api",
+    "websocket",
+    "live",
+    "ws"
+  ],
+  "author": "simon3000 <simon3000@163.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/simon300000/bilibili-live-ws/issues"
+  },
+  "homepage": "https://github.com/simon300000/bilibili-live-ws#readme",
+  "dependencies": {
+    "ws": "^6.2.1"
+  }
+}
