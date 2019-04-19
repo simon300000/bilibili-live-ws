@@ -57,7 +57,7 @@ const decoder = async buffer => {
   return realPack
 }
 
-const encoder = ({ type, body = '[object Object]' }) => {
+const encoder = ({ type, body = '' }) => {
   if (typeof body !== 'string') {
     body = JSON.stringify(body)
   }
