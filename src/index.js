@@ -2,35 +2,44 @@ const WebSocket = require('ws')
 
 const { encoder, decoder } = require('./buffer')
 
-class LiveWS {
+class LiveWS extends WebSocket {
   constructor(roomid) {
+    super('wss://broadcastlv.chat.bilibili.com/sub')
     this.roomid = roomid
     this.online = 0
-    this.ws = new WebSocket('wss://broadcastlv.chat.bilibili.com/sub')
 
-    this.ws.on('open', () => {
+    this.on('open', () => {
       let buf = encoder({ type: 'join', body: { uid: 0, roomid, protover: 2, platform: 'web', clientver: '1.6.3', type: 2 } })
-      // console.log(buf)
-      this.ws.send(buf)
+      this.send(buf)
     })
 
-    this.ws.on('message', async buffer => {
+    this.on('message', async buffer => {
       let packs = await decoder(buffer)
       for (let i = 0; i < packs.length; i++) {
         if (packs[i].type === 'welcome') {
-          this.ws.send(encoder({ type: 'heartbeat' }))
+          this.live = true
+          this.emit('live')
+          this.send(encoder({ type: 'heartbeat' }))
         }
         if (packs[i].type === 'heartbeat') {
           this.online = packs[i].data
-          this.heartbeat()
+          clearTimeout(this.timeout)
+          this.timeout = setTimeout(() => this.heartbeat(), 1000 * 30)
+          this.emit('heartbeat', this.online)
+        }
+        if (packs[i].type === 'message') {
+          this.emit('msg', packs[i].data)
+          this.emit(packs[i].data.cmd, packs[i].data)
         }
       }
     })
   }
-  wait(ms) { return new Promise(resolve => setTimeout(resolve, ms)) }
-  async heartbeat() {
-    await this.wait(1000 * 30)
-    this.ws.send(encoder({ type: 'heartbeat' }))
+  close() {
+    clearTimeout(this.timeout)
+    super.close()
+  }
+  heartbeat() {
+    this.send(encoder({ type: 'heartbeat' }))
   }
 }
 
