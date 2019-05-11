@@ -39,7 +39,9 @@ class LiveWS extends WebSocket {
     super.close()
   }
   heartbeat() {
-    this.send(encoder({ type: 'heartbeat' }))
+    if (this.readyState === 1) {
+      this.send(encoder({ type: 'heartbeat' }))
+    }
   }
   getOnline() {
     this.heartbeat()
