@@ -135,6 +135,10 @@ WebSocket连接上了
 
 关闭WebSocket连接。
 
+#### ws.getOnline()
+
+立即调用 `ws.heartbeat()` 刷新人气数值，并且返回 Promise，resolve 人气刷新后数值
+
 #### ws.on('message')
 
 WebSocket收到的Raw Buffer（不推荐直接使用）
