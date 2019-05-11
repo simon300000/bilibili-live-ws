@@ -38,6 +38,10 @@ class LiveWS extends WebSocket {
     clearTimeout(this.timeout)
     super.close()
   }
+  terminate() {
+    clearTimeout(this.timeout)
+    super.terminate()
+  }
   heartbeat() {
     if (this.readyState === 1) {
       this.send(encoder({ type: 'heartbeat' }))
