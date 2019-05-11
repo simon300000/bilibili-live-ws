@@ -41,6 +41,10 @@ class LiveWS extends WebSocket {
   heartbeat() {
     this.send(encoder({ type: 'heartbeat' }))
   }
+  getOnline() {
+    this.heartbeat()
+    return new Promise(resolve => this.once('heartbeat', resolve))
+  }
 }
 
 module.exports = LiveWS
