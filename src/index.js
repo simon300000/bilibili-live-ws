@@ -3,7 +3,14 @@ const WebSocket = require('ws')
 const { encoder, decoder } = require('./buffer')
 
 class LiveWS extends WebSocket {
+  /**
+   * 
+   * @param {number} roomid
+   */
   constructor(roomid) {
+    if (typeof roomid !== 'number' || Number.isNaN(roomid)) {
+      throw new Error(`roomid ${roomid} must be Number not NaN`)
+    }
     super('wss://broadcastlv.chat.bilibili.com/sub')
     this.roomid = roomid
     this.online = 0
