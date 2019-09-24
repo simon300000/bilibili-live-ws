@@ -4,7 +4,6 @@ const { encoder, decoder } = require('./buffer')
 
 class LiveWS extends WebSocket {
   /**
-   * 
    * @param {number} roomid
    */
   constructor(roomid) {

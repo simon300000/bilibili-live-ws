@@ -1,4 +1,4 @@
-# bilibili-live-ws [![npm](https://img.shields.io/npm/v/bilibili-live-ws.svg)](https://www.npmjs.com/package/bilibili-live-ws)
+# bilibili-live-ws [![npm](https://img.shields.io/npm/v/bilibili-live-ws.svg)](https://www.npmjs.com/package/bilibili-live-ws) [![Coverage Status](https://coveralls.io/repos/github/simon300000/bilibili-live-ws/badge.svg?branch=master)](https://coveralls.io/github/simon300000/bilibili-live-ws?branch=master)
 
 Bilibili 直播WebSocket API
 
