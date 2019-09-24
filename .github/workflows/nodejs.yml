@@ -8,9 +8,9 @@ jobs:
     runs-on: macOS-latest
 
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@master
     - name: Use Node.js 12
-      uses: actions/setup-node@v1
+      uses: actions/setup-node@master
       with:
         node-version: '12'
     - name: npm install and test
@@ -19,7 +19,7 @@ jobs:
         npm test
         npm run coverage
     - name: Coveralls GitHub Action
-      uses: coverallsapp/github-action@v1
+      uses: coverallsapp/github-action@master
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
       env:
