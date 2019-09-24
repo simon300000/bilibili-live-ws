@@ -4,7 +4,9 @@
   "description": "Bilibili Live WebSocket API",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "npm run unit",
+    "unit": "nyc mocha --reporter=landing",
+    "coverage": "mkdir coverage; nyc report --reporter=text-lcov >> ./coverage/lcov.info"
   },
   "repository": {
     "type": "git",
@@ -27,11 +29,15 @@
     "ws": "^6.2.1"
   },
   "devDependencies": {
+    "chai": "^4.2.0",
+    "coveralls": "^3.0.6",
     "eslint": "^5.16.0",
     "eslint-config-standard": "^12.0.0",
     "eslint-plugin-import": "^2.17.2",
     "eslint-plugin-node": "^8.0.1",
     "eslint-plugin-promise": "^4.1.1",
-    "eslint-plugin-standard": "^4.0.0"
+    "eslint-plugin-standard": "^4.0.0",
+    "mocha": "^6.2.0",
+    "nyc": "^14.1.1"
   }
 }
