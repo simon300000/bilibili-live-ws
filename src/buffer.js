@@ -35,8 +35,8 @@ const decoder = async buffer => {
     if (protocol === 0) {
       data = JSON.parse(String(body))
     }
-    if (protocol === 1 && body.length && operation !== 8) {
-      data = body.readUIntBE(0, body.length)
+    if (protocol === 1 && body.length === 4) {
+      data = body.readUIntBE(0, 4)
     }
     if (protocol === 2) {
       data = await decoder((await inflateAsync(body)))
