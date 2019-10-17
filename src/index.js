@@ -15,7 +15,7 @@ class LiveWS extends WebSocket {
     this.online = 0
 
     this.on('open', () => {
-      let buf = encoder({ type: 'join', body: { uid: 0, roomid, protover: 2, platform: 'web', clientver: '1.6.3', type: 2 } })
+      let buf = encoder({ type: 'join', body: { uid: 0, roomid, protover: 2, platform: 'web', clientver: '1.8.5', type: 2 } })
       this.send(buf)
     })
 
