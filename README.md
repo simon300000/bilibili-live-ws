@@ -1,54 +1,87 @@
-# bilibili-live-ws [![npm](https://img.shields.io/npm/v/bilibili-live-ws.svg)](https://www.npmjs.com/package/bilibili-live-ws) [![Coverage Status](https://coveralls.io/repos/github/simon300000/bilibili-live-ws/badge.svg?branch=master)](https://coveralls.io/github/simon300000/bilibili-live-ws?branch=master)
+# bilibili-live-ws [![npm](https://img.shields.io/npm/v/bilibili-live-ws.svg)](https://www.npmjs.com/package/bilibili-live-ws) [![Coverage Status](https://coveralls.io/repos/github/simon300000/bilibili-live-ws/badge.svg?branch=master)](https://coveralls.io/github/simon300000/bilibili-live-ws?branch=master) ![Node CI](https://github.com/simon300000/bilibili-live-ws/workflows/Node%20CI/badge.svg)
 
-Bilibili 直播WebSocket API
+Bilibili 直播 WebSocket/TCP API
 
 ## API
 
 ```javascript
-const LiveWS = require('bilibili-live-ws')
-let ws = new LiveWS(roomid)
+const { LiveWS, LiveTCP } = require('bilibili-live-ws')
+const live = new LiveWS(roomid)
+// 或
+const live = new LiveTCP(roomid)
 ```
 
 举个栗子:
 
 ```javascript
-let ws = new LiveWS(14327465)
+const live = new LiveWS(14275133)
 
-ws.on('open', () => console.log('Connection is established'))
+live.on('open', () => console.log('Connection is established'))
 // Connection is established
-ws.on('live', () => {
-  ws.on('heartbeat', console.log)
-  // 20603
+live.on('live', () => {
+  live.on('heartbeat', console.log)
+  // 74185
 })
 ```
 
-## Class: LiveWS
+或者用TCP (新功能):
 
-### new LiveWS(roomid)
+```javascript
+const live = new LiveTCP(26283)
+
+live.on('open', () => console.log('Connection is established'))
+// Connection is established
+live.on('live', () => {
+  live.on('heartbeat', console.log)
+  // 13928
+})
+```
+
+> 晚上做梦梦到一个白胡子的老爷爷和我说TCP更节约内存哦！
+
+## Class: LiveWS / LiveTCP
+
+LiveWS 和 LiveTCP 的大部分API基本上一样, 区别在本文末尾有注明
+
+### new LiveWS(roomid [, address])
+
+### new LiveTCP(roomid [, host, port])
 
 - `roomid` 房间号
 
   比如 https://live.bilibili.com/14327465 中的 `14327465`
+  
+- `address` 可选, WebSocket连接的地址
 
-#### ws.on('open')
+  默认 `wss://broadcastlv.chat.bilibili.com/sub`
+
+- `host` 可选, TCP连接的地址
+
+  默认 `broadcastlv.chat.bilibili.com`
+
+- `port` 可选, TCP连接的端口
+
+  默认 `2243`
+
+#### live.on('open')
 
 WebSocket连接上了
 
-#### ws.on('live')
+#### live.on('live')
 
 成功登入房间
 
-#### ws.on('heartbeat')
+#### live.on('heartbeat', (online) => ...)
 
 收到服务器心跳包，会在30秒之后自动发送心跳包。
 
-- `Data` 当前人气值
+- `online` 当前人气值
 
-#### ws.on('msg')
+#### live.on('msg', (data) => ...)
 
-- `Data` 收到信息/弹幕/广播等
+- `data` 收到信息/弹幕/广播等
 
-  Data的例子: (我simon3000送了一个辣条)
+  data的例子: (我simon3000送了一个辣条)
 
   ```javascript
   {
@@ -97,11 +130,11 @@ WebSocket连接上了
   }
   ```
 
-#### ws.on(cmd)
+#### live.on(cmd, (data) => ...)
 
 用法如上，只不过只会收到特定cmd的Event。
 
-比如 `ws.on('DANMU_MSG')` 只会收到弹幕Event，一个弹幕Event的Data例子如下: (我simon3000发了个`233`)
+比如 `live.on('DANMU_MSG')` 只会收到弹幕Event，一个弹幕Event的Data例子如下: (我simon3000发了个`233`)
 
 ```javascript
 {
@@ -123,28 +156,64 @@ WebSocket连接上了
 
 
 
-#### ws.heartbeat()
+#### live.on('close')
+
+连接关闭事件
+
+#### live.on('error', (e) => ...)
+
+连接 error 事件，连接同时也会关闭
+
+#### live.heartbeat()
 
 无视30秒时间，直接发送一个心跳包。
 
-如果连接正常，会收到来自服务器的心跳包，也就是 `ws.on('heartbeat')`，可以用于更新人气值。
+如果连接正常，会收到来自服务器的心跳包，也就是 `live.on('heartbeat')`，可以用于更新人气值。
 
-#### ws.close()
+#### live.close()
 
-关闭WebSocket连接。
+关闭WebSocket/TCP Socket连接。
 
-#### ws.getOnline()
+#### live.getOnline()
 
-立即调用 `ws.heartbeat()` 刷新人气数值，并且返回 Promise，resolve 人气刷新后数值
+立即调用 `live.heartbeat()` 刷新人气数值，并且返回 Promise，resolve 人气刷新后数值
 
-#### ws.on('message')
+#### live.on('message')
 
-WebSocket收到的Raw Buffer（不推荐直接使用）
+WebSocket/TCP收到的Raw Buffer（不推荐直接使用）
 
-推荐参考<https://github.com/lovelyyoshino/Bilibili-Live-API/blob/master/API.WebSocket.md>
+#### live.send(buffer)
+
+使用 WebSocket 或者 TCP 发送信息
+
+<hr>
+
+### LiveWS 和 LiveTCP 的区别
+
+#### LiveWS.ws
+
+LiveWS 内部 WebSocket 对象，需要时可以直接操作
+
+Doc: <https://github.com/websockets/ws/blob/master/doc/ws.md#class-websocket>
+
+#### LiveTCP.socket
+
+LiveTCP 内部 TCP Socket 对象，需要时可以直接操作
+
+Doc: <https://nodejs.org/api/net.html#net_class_net_socket>
+
+### BenchMark 简单对比
+
+在连接了640个直播间后过了一分钟左右
+
+|          | LiveWS (wss) | LiveWS (ws) | LiveTCP |
+| -------- | ------------ | ----------- | ------- |
+| 内存占用 | 63 MB        | 26 MB       | 18 MB   |
+
+<hr>
+
+参考资料: <https://github.com/lovelyyoshino/Bilibili-Live-API/blob/master/API.WebSocket.md>
 
 # 贡献
-
-更多神奇用法请参照：[WebSocket](https://github.com/websockets/ws/blob/master/doc/ws.md#class-websocket)
 
 欢迎Issue和Pull Request！

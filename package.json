@@ -1,7 +1,7 @@
 {
   "name": "bilibili-live-ws",
-  "version": "1.1.6",
-  "description": "Bilibili Live WebSocket API",
+  "version": "2.0.0",
+  "description": "Bilibili Live WebSocket/TCP API",
   "main": "index.js",
   "scripts": {
     "test": "npm run unit",
@@ -17,7 +17,8 @@
     "api",
     "websocket",
     "live",
-    "ws"
+    "ws",
+    "tcp"
   ],
   "author": "simon3000 <simon3000@163.com>",
   "license": "MIT",
