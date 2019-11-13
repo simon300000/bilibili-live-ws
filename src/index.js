@@ -12,6 +12,8 @@ class Live extends EventEmitter {
     }
 
     super()
+    this.roomid = roomid
+    this.online = 0
 
     this.on('message', async buffer => {
       const packs = await decoder(buffer)
@@ -75,8 +77,6 @@ class LiveWS extends Live {
 
     const ws = new WebSocket('wss://broadcastlv.chat.bilibili.com/sub')
     this.ws = ws
-    this.roomid = roomid
-    this.online = 0
 
     ws.on('open', (...params) => this.emit('open', ...params))
     ws.on('message', (...params) => this.emit('message', ...params))
@@ -104,8 +104,6 @@ class LiveTCP extends Live {
 
     const socket = net.connect(2243, 'broadcastlv.chat.bilibili.com')
     this.socket = socket
-    this.roomid = roomid
-    this.online = 0
 
     socket.on('ready', (...params) => this.emit('open', ...params))
     socket.on('data', (...params) => this.emit('message', ...params))
