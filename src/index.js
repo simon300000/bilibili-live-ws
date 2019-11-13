@@ -1,8 +1,10 @@
+const EventEmitter = require('events')
+
 const WebSocket = require('ws')
 
 const { encoder, decoder } = require('./buffer')
 
-class LiveWS extends WebSocket {
+class LiveWS extends EventEmitter {
   /**
    * @param {number} roomid
    */
@@ -10,9 +12,17 @@ class LiveWS extends WebSocket {
     if (typeof roomid !== 'number' || Number.isNaN(roomid)) {
       throw new Error(`roomid ${roomid} must be Number not NaN`)
     }
-    super('wss://broadcastlv.chat.bilibili.com/sub')
+    super()
+
+    this.ws = new WebSocket('wss://broadcastlv.chat.bilibili.com/sub')
     this.roomid = roomid
     this.online = 0
+
+    this.ws.on('open', (...params) => this.emit('open', ...params))
+    this.ws.on('message', (...params) => this.emit('message', ...params))
+    this.ws.on('close', (...params) => this.emit('close', ...params))
+
+    this.send = data => this.ws.send(data)
 
     this.on('open', () => {
       const buf = encoder({ type: 'join', body: { uid: 0, roomid, protover: 2, platform: 'web', clientver: '1.8.5', type: 2 } })
@@ -51,12 +61,12 @@ class LiveWS extends WebSocket {
 
   close() {
     clearTimeout(this.timeout)
-    super.close()
+    this.ws.close()
   }
 
   terminate() {
     clearTimeout(this.timeout)
-    super.terminate()
+    this.ws.terminate()
   }
 
   heartbeat() {
@@ -71,4 +81,4 @@ class LiveWS extends WebSocket {
   }
 }
 
-module.exports = LiveWS
+module.exports = { LiveWS }

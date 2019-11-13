@@ -1,7 +1,7 @@
 /* global describe */
 /* global context */
 /* global it */
-const LiveWS = require('..')
+const { LiveWS } = require('..')
 
 const { assert } = require('chai')
 
