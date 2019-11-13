@@ -24,8 +24,6 @@ ws.on('live', () => {
 
 ## Class: LiveWS
 
-LiveWS extends [WebSocket](https://github.com/websockets/ws/blob/master/doc/ws.md#class-websocket)
-
 ### new LiveWS(roomid)
 
 - `roomid` 房间号

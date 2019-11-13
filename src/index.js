@@ -4,30 +4,13 @@ const WebSocket = require('ws')
 
 const { encoder, decoder } = require('./buffer')
 
-class LiveWS extends EventEmitter {
-  /**
-   * @param {number} roomid
-   */
+class Live extends EventEmitter {
   constructor(roomid) {
     if (typeof roomid !== 'number' || Number.isNaN(roomid)) {
       throw new Error(`roomid ${roomid} must be Number not NaN`)
     }
+
     super()
-
-    this.ws = new WebSocket('wss://broadcastlv.chat.bilibili.com/sub')
-    this.roomid = roomid
-    this.online = 0
-
-    this.ws.on('open', (...params) => this.emit('open', ...params))
-    this.ws.on('message', (...params) => this.emit('message', ...params))
-    this.ws.on('close', (...params) => this.emit('close', ...params))
-
-    this.send = data => this.ws.send(data)
-
-    this.on('open', () => {
-      const buf = encoder({ type: 'join', body: { uid: 0, roomid, protover: 2, platform: 'web', clientver: '1.8.5', type: 2 } })
-      this.send(buf)
-    })
 
     this.on('message', async buffer => {
       const packs = await decoder(buffer)
@@ -57,6 +40,34 @@ class LiveWS extends EventEmitter {
         }
       })
     })
+
+    this.on('open', () => {
+      const buf = encoder({ type: 'join', body: { uid: 0, roomid, protover: 2, platform: 'web', clientver: '1.8.5', type: 2 } })
+      this.send(buf)
+    })
+  }
+}
+
+class LiveWS extends Live {
+  /**
+   * @param {number} roomid
+   */
+  constructor(roomid) {
+    super(roomid)
+
+    this.ws = new WebSocket('wss://broadcastlv.chat.bilibili.com/sub')
+    this.roomid = roomid
+    this.online = 0
+
+    this.ws.on('open', (...params) => this.emit('open', ...params))
+    this.ws.on('message', (...params) => this.emit('message', ...params))
+    this.ws.on('close', (...params) => this.emit('close', ...params))
+
+    this.send = data => {
+      if (this.ws.readyState === 1) {
+        this.ws.send(data)
+      }
+    }
   }
 
   close() {
@@ -70,9 +81,7 @@ class LiveWS extends EventEmitter {
   }
 
   heartbeat() {
-    if (this.readyState === 1) {
-      this.send(encoder({ type: 'heartbeat' }))
-    }
+    this.send(encoder({ type: 'heartbeat' }))
   }
 
   getOnline() {
