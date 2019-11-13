@@ -15,48 +15,55 @@ class LiveWS extends WebSocket {
     this.online = 0
 
     this.on('open', () => {
-      let buf = encoder({ type: 'join', body: { uid: 0, roomid, protover: 2, platform: 'web', clientver: '1.8.5', type: 2 } })
+      const buf = encoder({ type: 'join', body: { uid: 0, roomid, protover: 2, platform: 'web', clientver: '1.8.5', type: 2 } })
       this.send(buf)
     })
 
     this.on('message', async buffer => {
-      let packs = await decoder(buffer)
-      for (let i = 0; i < packs.length; i++) {
-        if (packs[i].type === 'welcome') {
+      const packs = await decoder(buffer)
+      packs.forEach(pack => {
+        const { type, data } = pack
+        if (type === 'welcome') {
           this.live = true
           this.emit('live')
           this.send(encoder({ type: 'heartbeat' }))
         }
-        if (packs[i].type === 'heartbeat') {
-          this.online = packs[i].data
+        if (type === 'heartbeat') {
+          this.online = data
           clearTimeout(this.timeout)
           this.timeout = setTimeout(() => this.heartbeat(), 1000 * 30)
           this.emit('heartbeat', this.online)
         }
-        if (packs[i].type === 'message') {
-          this.emit('msg', packs[i].data)
-          if (packs[i].data.cmd.includes('DANMU_MSG')) {
-            this.emit('DANMU_MSG', packs[i].data)
-          } else {
-            this.emit(packs[i].data.cmd, packs[i].data)
+        if (type === 'message') {
+          this.emit('msg', data)
+          if (data.cmd) {
+            if (data.cmd.includes('DANMU_MSG')) {
+              this.emit('DANMU_MSG', data)
+            } else {
+              this.emit(data.cmd, data)
+            }
           }
         }
-      }
+      })
     })
   }
+
   close() {
     clearTimeout(this.timeout)
     super.close()
   }
+
   terminate() {
     clearTimeout(this.timeout)
     super.terminate()
   }
+
   heartbeat() {
     if (this.readyState === 1) {
       this.send(encoder({ type: 'heartbeat' }))
     }
   }
+
   getOnline() {
     this.heartbeat()
     return new Promise(resolve => this.once('heartbeat', resolve))
