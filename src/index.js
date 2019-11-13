@@ -45,6 +45,19 @@ class Live extends EventEmitter {
       const buf = encoder({ type: 'join', body: { uid: 0, roomid, protover: 2, platform: 'web', clientver: '1.8.5', type: 2 } })
       this.send(buf)
     })
+
+    this.on('close', () => {
+      clearTimeout(this.timeout)
+    })
+  }
+
+  heartbeat() {
+    this.send(encoder({ type: 'heartbeat' }))
+  }
+
+  getOnline() {
+    this.heartbeat()
+    return new Promise(resolve => this.once('heartbeat', resolve))
   }
 }
 
@@ -63,6 +76,8 @@ class LiveWS extends Live {
     this.ws.on('message', (...params) => this.emit('message', ...params))
     this.ws.on('close', (...params) => this.emit('close', ...params))
 
+    this.ws.on('error', (...params) => this.emit('error', ...params))
+
     this.send = data => {
       if (this.ws.readyState === 1) {
         this.ws.send(data)
@@ -71,22 +86,7 @@ class LiveWS extends Live {
   }
 
   close() {
-    clearTimeout(this.timeout)
     this.ws.close()
-  }
-
-  terminate() {
-    clearTimeout(this.timeout)
-    this.ws.terminate()
-  }
-
-  heartbeat() {
-    this.send(encoder({ type: 'heartbeat' }))
-  }
-
-  getOnline() {
-    this.heartbeat()
-    return new Promise(resolve => this.once('heartbeat', resolve))
   }
 }
 

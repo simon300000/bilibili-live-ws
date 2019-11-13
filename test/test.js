@@ -30,18 +30,10 @@ describe('bilibili live ws', function() {
       })))
       return assert.strictEqual(close, 'closed')
     })
-    it('terminate', async function() {
-      const ws = new LiveWS(12235923)
-      const terminate = await new Promise(resolve => ws.on('live', () => ws.on('heartbeat', () => {
-        ws.on('close', () => resolve('terminated'))
-        ws.terminate()
-      })))
-      return assert.strictEqual(terminate, 'terminated')
-    })
     it('getOnline', async function() {
       const ws = new LiveWS(12235923)
       const online = await new Promise(resolve => ws.on('live', () => resolve(ws.getOnline())))
-      ws.terminate()
+      ws.close()
       return assert.isAbove(online, 0)
     })
   })
