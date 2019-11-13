@@ -71,5 +71,24 @@ Object.entries({ LiveWS, LiveTCP })
           return assert.strictEqual(close, 'closed')
         })
       })
+      context('options', function() {
+        if (name === 'LiveWS') {
+          it('address', async function() {
+            const live = new Live(12235923, 'wss://broadcastlv.chat.bilibili.com:2245/sub')
+            const [online] = await once(live, 'heartbeat')
+            live.close()
+            return assert.isAbove(online, 0)
+          })
+        } else if (name === 'LiveTCP') {
+          it('host, port', async function() {
+            const live = new Live(12235923, 'tx-tokyo-live-comet-01.chat.bilibili.com', 2243)
+            const [online] = await once(live, 'heartbeat')
+            live.close()
+            return assert.isAbove(online, 0)
+          })
+        } else {
+          throw new Error('no options test')
+        }
+      })
     })
   })

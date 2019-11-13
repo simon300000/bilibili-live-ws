@@ -70,12 +70,13 @@ class Live extends EventEmitter {
 
 class LiveWS extends Live {
   /**
-   * @param {number} roomid
+   * @param {number} roomid  房间号
+   * @param {string} address WebSocket url
    */
-  constructor(roomid) {
+  constructor(roomid, address = 'wss://broadcastlv.chat.bilibili.com/sub') {
     super(roomid)
 
-    const ws = new WebSocket('wss://broadcastlv.chat.bilibili.com/sub')
+    const ws = new WebSocket(address)
     this.ws = ws
 
     ws.on('open', (...params) => this.emit('open', ...params))
@@ -97,12 +98,14 @@ class LiveWS extends Live {
 
 class LiveTCP extends Live {
   /**
-   * @param {number} roomid
+   * @param {number} roomid 房间号
+   * @param {string} host   TCP Host
+   * @param {number} port   TCP 端口
    */
-  constructor(roomid) {
+  constructor(roomid, host = 'broadcastlv.chat.bilibili.com', port = 2243) {
     super(roomid)
 
-    const socket = net.connect(2243, 'broadcastlv.chat.bilibili.com')
+    const socket = net.connect(port, host)
     this.socket = socket
 
     socket.on('ready', (...params) => this.emit('open', ...params))
