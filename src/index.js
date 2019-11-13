@@ -68,19 +68,19 @@ class LiveWS extends Live {
   constructor(roomid) {
     super(roomid)
 
-    this.ws = new WebSocket('wss://broadcastlv.chat.bilibili.com/sub')
+    const ws = new WebSocket('wss://broadcastlv.chat.bilibili.com/sub')
+    this.ws = ws
     this.roomid = roomid
     this.online = 0
 
-    this.ws.on('open', (...params) => this.emit('open', ...params))
-    this.ws.on('message', (...params) => this.emit('message', ...params))
-    this.ws.on('close', (...params) => this.emit('close', ...params))
-
-    this.ws.on('error', (...params) => this.emit('error', ...params))
+    ws.on('open', (...params) => this.emit('open', ...params))
+    ws.on('message', (...params) => this.emit('message', ...params))
+    ws.on('close', (...params) => this.emit('close', ...params))
+    ws.on('error', (...params) => this.emit('error', ...params))
 
     this.send = data => {
-      if (this.ws.readyState === 1) {
-        this.ws.send(data)
+      if (ws.readyState === 1) {
+        ws.send(data)
       }
     }
   }
