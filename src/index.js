@@ -53,8 +53,9 @@ class Live extends EventEmitter {
       clearTimeout(this.timeout)
     })
 
-    this.on('error', () => {
+    this.on('_error', (...params) => {
       this.close()
+      this.emit('error', ...params)
     })
   }
 
@@ -82,7 +83,7 @@ class LiveWS extends Live {
     ws.on('open', (...params) => this.emit('open', ...params))
     ws.on('message', (...params) => this.emit('message', ...params))
     ws.on('close', (...params) => this.emit('close', ...params))
-    ws.on('error', (...params) => this.emit('error', ...params))
+    ws.on('error', (...params) => this.emit('_error', ...params))
 
     this.send = data => {
       if (ws.readyState === 1) {
@@ -111,7 +112,7 @@ class LiveTCP extends Live {
     socket.on('ready', (...params) => this.emit('open', ...params))
     socket.on('data', (...params) => this.emit('message', ...params))
     socket.on('close', (...params) => this.emit('close', ...params))
-    socket.on('error', (...params) => this.emit('error', ...params))
+    socket.on('error', (...params) => this.emit('_error', ...params))
 
     this.send = data => {
       socket.write(data)
