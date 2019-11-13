@@ -8,12 +8,12 @@ const { assert } = require('chai')
 Object.entries({ LiveWS, LiveTCP })
   .forEach(([name, Live]) => {
     describe(name, function() {
-      this.timeout(1000 * 15)
+      this.timeout(1000 * 25)
       context('Connect', function() {
         it('online', async function() {
-          const ws = new Live(12235923)
-          const online = await new Promise(resolve => ws.on('live', () => ws.on('heartbeat', resolve)))
-          ws.close()
+          const live = new Live(12235923)
+          const online = await new Promise(resolve => live.on('live', () => live.on('heartbeat', resolve)))
+          live.close()
           return assert.isAbove(online, 0)
         })
         it('roomid must be number', function() {
@@ -25,18 +25,26 @@ Object.entries({ LiveWS, LiveTCP })
       })
       context('functions', function() {
         it('close', async function() {
-          const ws = new Live(12235923)
-          const close = await new Promise(resolve => ws.on('live', () => ws.on('heartbeat', () => {
-            ws.on('close', () => resolve('closed'))
-            ws.close()
+          const live = new Live(12235923)
+          const close = await new Promise(resolve => live.on('live', () => live.on('heartbeat', () => {
+            live.on('close', () => resolve('closed'))
+            live.close()
           })))
           return assert.strictEqual(close, 'closed')
         })
         it('getOnline', async function() {
-          const ws = new Live(12235923)
-          const online = await new Promise(resolve => ws.on('live', () => resolve(ws.getOnline())))
-          ws.close()
+          const live = new Live(12235923)
+          const online = await new Promise(resolve => live.on('live', () => resolve(live.getOnline())))
+          live.close()
           return assert.isAbove(online, 0)
+        })
+        it('close on error', async function() {
+          const live = new Live(12235923)
+          const close = await new Promise(resolve => live.on('live', () => live.on('heartbeat', () => {
+            live.on('close', () => resolve('closed'))
+            live.emit('error')
+          })))
+          return assert.strictEqual(close, 'closed')
         })
       })
     })

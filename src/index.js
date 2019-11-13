@@ -50,6 +50,10 @@ class Live extends EventEmitter {
     this.on('close', () => {
       clearTimeout(this.timeout)
     })
+
+    this.on('error', () => {
+      this.close()
+    })
   }
 
   heartbeat() {
