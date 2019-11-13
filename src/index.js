@@ -36,11 +36,12 @@ class LiveWS extends WebSocket {
         }
         if (type === 'message') {
           this.emit('msg', data)
-          if (data.cmd) {
-            if (data.cmd.includes('DANMU_MSG')) {
+          const cmd = data.cmd || (data.msg && data.msg.cmd)
+          if (cmd) {
+            if (cmd.includes('DANMU_MSG')) {
               this.emit('DANMU_MSG', data)
             } else {
-              this.emit(data.cmd, data)
+              this.emit(cmd, data)
             }
           }
         }
