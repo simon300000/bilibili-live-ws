@@ -1,4 +1,5 @@
 const EventEmitter = require('events')
+const net = require('net')
 
 const WebSocket = require('ws')
 
@@ -90,4 +91,31 @@ class LiveWS extends Live {
   }
 }
 
-module.exports = { LiveWS }
+class LiveTCP extends Live {
+  /**
+   * @param {number} roomid
+   */
+  constructor(roomid) {
+    super(roomid)
+
+    const socket = net.connect(2243, 'broadcastlv.chat.bilibili.com')
+    this.socket = socket
+    this.roomid = roomid
+    this.online = 0
+
+    socket.on('ready', (...params) => this.emit('open', ...params))
+    socket.on('data', (...params) => this.emit('message', ...params))
+    socket.on('close', (...params) => this.emit('close', ...params))
+    socket.on('error', (...params) => this.emit('error', ...params))
+
+    this.send = data => {
+      socket.write(data)
+    }
+  }
+
+  close() {
+    this.socket.end()
+  }
+}
+
+module.exports = { LiveWS, LiveTCP }
