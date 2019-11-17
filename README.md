@@ -1,4 +1,4 @@
-# bilibili-live-ws [![npm](https://img.shields.io/npm/v/bilibili-live-ws.svg)](https://www.npmjs.com/package/bilibili-live-ws) [![Coverage Status](https://coveralls.io/repos/github/simon300000/bilibili-live-ws/badge.svg?branch=master)](https://coveralls.io/github/simon300000/bilibili-live-ws?branch=master) ![Node CI](https://github.com/simon300000/bilibili-live-ws/workflows/Node%20CI/badge.svg) ![NPM CD](https://github.com/simon300000/bilibili-live-ws/workflows/NPM%20CD/badge.svg)
+# bilibili-live-ws [![npm](https://img.shields.io/npm/v/bilibili-live-ws.svg)](https://www.npmjs.com/package/bilibili-live-ws) [![Coverage Status](https://coveralls.io/repos/github/simon300000/bilibili-live-ws/badge.svg?branch=master)](https://coveralls.io/github/simon300000/bilibili-live-ws?branch=master) ![Node CI](https://github.com/simon300000/bilibili-live-ws/workflows/Node%20CI/badge.svg)
 
 Bilibili 直播 WebSocket/TCP API
 
