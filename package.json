@@ -1,6 +1,6 @@
 {
   "name": "bilibili-live-ws",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Bilibili Live WebSocket/TCP API",
   "main": "index.js",
   "scripts": {
