@@ -108,14 +108,28 @@ class LiveTCP extends Live {
 
     const socket = net.connect(port, host)
     this.socket = socket
+    this.buffer = Buffer.alloc(0)
 
     socket.on('ready', (...params) => this.emit('open', ...params))
-    socket.on('data', (...params) => this.emit('message', ...params))
     socket.on('close', (...params) => this.emit('close', ...params))
     socket.on('error', (...params) => this.emit('_error', ...params))
 
+    socket.on('data', buffer => {
+      this.buffer = Buffer.concat([this.buffer, buffer])
+      this.splitBuffer()
+    })
+
     this.send = data => {
       socket.write(data)
+    }
+  }
+
+  splitBuffer() {
+    while (this.buffer.length >= 4 && this.buffer.readInt32BE(0) < this.buffer.length) {
+      const size = this.buffer.readInt32BE(0)
+      const pack = this.buffer.slice(0, size)
+      this.buffer = this.buffer.slice(size)
+      this.emit('message', pack)
     }
   }
 

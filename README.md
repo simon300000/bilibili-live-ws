@@ -202,9 +202,17 @@ LiveTCP 内部 TCP Socket 对象，需要时可以直接操作
 
 Doc: <https://nodejs.org/api/net.html#net_class_net_socket>
 
+#### LiveTCP.buffer
+
+LiveTCP内部TCP流的Buffer缓冲区，有不完整的包
+
+#### LiveTCP.splitBuffer()
+
+处理LiveTCP内部TCP流的Buffer缓冲区，把其中完整的包交给decoder处理
+
 ### BenchMark 简单对比
 
-在连接了640个直播间后过了一分钟左右
+在连接了640个直播间后过了一分钟左右(@2.0.0)
 
 |          | LiveWS (wss) | LiveWS (ws) | LiveTCP |
 | -------- | ------------ | ----------- | ------- |

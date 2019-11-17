@@ -7,18 +7,18 @@ const blank = Buffer.alloc(16)
 // https://github.com/lovelyyoshino/Bilibili-Live-API/blob/master/API.WebSocket.md
 
 const decoder = async buffer => {
-  let packs = []
+  const packs = []
   let size
   for (let i = 0; i < buffer.length; i += size) {
     size = buffer.readInt32BE(i)
     packs.push(buffer.slice(i, i + size))
   }
   for (let i = 0; i < packs.length; i++) {
-    let buf = packs[i]
+    const buf = packs[i]
 
-    let body = buf.slice(16)
-    let protocol = buf.readInt16BE(6)
-    let operation = buf.readInt32BE(8)
+    const body = buf.slice(16)
+    const protocol = buf.readInt16BE(6)
+    const operation = buf.readInt32BE(8)
 
     let type
     if (operation === 3) {
@@ -42,7 +42,7 @@ const decoder = async buffer => {
       data = await decoder((await inflateAsync(body)))
     }
 
-    let pack = { buf, type, protocol, data }
+    const pack = { buf, type, protocol, data }
     packs[i] = pack
   }
 
@@ -61,8 +61,8 @@ const encoder = ({ type, body = '' }) => {
   if (typeof body !== 'string') {
     body = JSON.stringify(body)
   }
-  let head = Buffer.from(blank)
-  let buffer = Buffer.from(body)
+  const head = Buffer.from(blank)
+  const buffer = Buffer.from(body)
 
   head.writeInt32BE(buffer.length + head.length, 0)
   head.writeInt16BE(16, 4)
