@@ -125,7 +125,7 @@ class LiveTCP extends Live {
   }
 
   splitBuffer() {
-    while (this.buffer.length >= 4 && this.buffer.readInt32BE(0) < this.buffer.length) {
+    while (this.buffer.length >= 4 && this.buffer.readInt32BE(0) <= this.buffer.length) {
       const size = this.buffer.readInt32BE(0)
       const pack = this.buffer.slice(0, size)
       this.buffer = this.buffer.slice(size)
