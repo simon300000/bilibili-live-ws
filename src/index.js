@@ -10,13 +10,14 @@ class Live extends EventEmitter {
       throw new Error(`roomid ${roomid} must be Number not NaN`)
     }
     super()
+
     this.roomid = roomid
     if (roomid < 10000) {
       const { request } = require('urllib-sync')
       const { data } = request(`https://api.live.bilibili.com/room/v1/Room/room_init?id=${roomid}`)
       const { data: { room_id } } = JSON.parse(data)
       if (typeof room_id !== 'number' || Number.isNaN(room_id)) {
-          throw new Error(`cannot get roomid`)
+        throw new Error(`cannot get roomid`)
       }
       this.roomid = room_id
     }
