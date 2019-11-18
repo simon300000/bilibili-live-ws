@@ -1,6 +1,5 @@
 const EventEmitter = require('events')
 const net = require('net')
-
 const WebSocket = require('ws')
 
 const { encoder, decoder } = require('./buffer')
@@ -10,9 +9,17 @@ class Live extends EventEmitter {
     if (typeof roomid !== 'number' || Number.isNaN(roomid)) {
       throw new Error(`roomid ${roomid} must be Number not NaN`)
     }
-
     super()
     this.roomid = roomid
+    if (roomid < 10000) {
+      const { request } = require('urllib-sync')
+      const { data } = request(`https://api.live.bilibili.com/room/v1/Room/room_init?id=${roomid}`)
+      const { data: { room_id } } = JSON.parse(data)
+      if (typeof room_id !== 'number' || Number.isNaN(room_id)) {
+          throw new Error(`cannot get roomid`)
+      }
+      this.roomid = room_id
+    }
     this.online = 0
 
     this.on('message', async buffer => {
