@@ -1,6 +1,8 @@
 const EventEmitter = require('events')
 const net = require('net')
+
 const WebSocket = require('ws')
+const got = require('got')
 
 const { encoder, decoder } = require('./buffer')
 
@@ -9,18 +11,9 @@ class Live extends EventEmitter {
     if (typeof roomid !== 'number' || Number.isNaN(roomid)) {
       throw new Error(`roomid ${roomid} must be Number not NaN`)
     }
+
     super()
 
-    this.roomid = roomid
-    if (roomid < 10000) {
-      const { request } = require('urllib-sync')
-      const { data } = request(`https://api.live.bilibili.com/room/v1/Room/room_init?id=${roomid}`)
-      const { data: { room_id } } = JSON.parse(data)
-      if (typeof room_id !== 'number' || Number.isNaN(room_id)) {
-        throw new Error(`cannot get roomid`)
-      }
-      this.roomid = room_id
-    }
     this.online = 0
 
     this.on('message', async buffer => {
@@ -53,7 +46,7 @@ class Live extends EventEmitter {
     })
 
     this.on('open', () => {
-      const buf = encoder({ type: 'join', body: { uid: 0, roomid, protover: 2, platform: 'web', clientver: '1.8.5', type: 2 } })
+      const buf = encoder({ type: 'join', body: { uid: 0, roomid: this.roomid, protover: 2, platform: 'web', clientver: '1.8.5', type: 2 } })
       this.send(buf)
     })
 
@@ -65,6 +58,17 @@ class Live extends EventEmitter {
       this.close()
       this.emit('error', ...params)
     })
+
+    this.init(roomid)
+  }
+
+  async init(roomid) {
+    if (roomid < 10000) {
+      const { body: { data: { room_id: longRoomid } } } = await got(`https://api.live.bilibili.com/room/v1/Room/room_init?id=${roomid}`, { json: true })
+      this.roomid = longRoomid
+    } else {
+      this.roomid = roomid
+    }
   }
 
   heartbeat() {
@@ -85,6 +89,13 @@ class LiveWS extends Live {
   constructor(roomid, address = 'wss://broadcastlv.chat.bilibili.com/sub') {
     super(roomid)
 
+    this.address = address
+  }
+
+  async init(roomid) {
+    await super.init(roomid)
+
+    const { address } = this
     const ws = new WebSocket(address)
     this.ws = ws
 
@@ -114,6 +125,14 @@ class LiveTCP extends Live {
   constructor(roomid, host = 'broadcastlv.chat.bilibili.com', port = 2243) {
     super(roomid)
 
+    this.port = port
+    this.host = host
+  }
+
+  async init(roomid) {
+    await super.init(roomid)
+
+    const { port, host } = this
     const socket = net.connect(port, host)
     this.socket = socket
     this.buffer = Buffer.alloc(0)

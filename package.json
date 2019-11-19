@@ -27,7 +27,7 @@
   },
   "homepage": "https://github.com/simon300000/bilibili-live-ws#readme",
   "dependencies": {
-    "urllib-sync": "^1.1.4",
+    "got": "^9.6.0",
     "ws": "^7.2.0"
   },
   "devDependencies": {
