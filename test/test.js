@@ -24,6 +24,12 @@ Object.entries({ LiveWS, LiveTCP })
         it('roomid can not be NaN', function() {
           return assert.throw(() => new Live(NaN))
         })
+        it('short roomid', async function() {
+          const live = new Live(281, ...name === 'LiveWS' ? [undefined] : [undefined, undefined], true)
+          const [online] = await once(live, 'heartbeat')
+          live.close()
+          return assert.isAbove(online, 0)
+        })
       })
       context('properties', function() {
         context('roomid', function() {
@@ -73,6 +79,24 @@ Object.entries({ LiveWS, LiveTCP })
         })
       })
       context('options', function() {
+        it('short roomid true', async function() {
+          const live = new Live(281, ...name === 'LiveWS' ? [undefined] : [undefined, undefined], true)
+          await once(live, 'live')
+          live.close()
+          return assert.strictEqual(live.roomid, 49728)
+        })
+        it('short roomid false', async function() {
+          const live = new Live(281, ...name === 'LiveWS' ? [undefined] : [undefined, undefined], false)
+          await once(live, 'live')
+          live.close()
+          return assert.strictEqual(live.roomid, 281)
+        })
+        it('short roomid default false', async function() {
+          const live = new Live(281)
+          await once(live, 'live')
+          live.close()
+          return assert.strictEqual(live.roomid, 281)
+        })
         if (name === 'LiveWS') {
           it('address', async function() {
             const live = new Live(12235923, 'wss://broadcastlv.chat.bilibili.com:2245/sub')
