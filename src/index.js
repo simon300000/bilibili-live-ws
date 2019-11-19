@@ -7,7 +7,7 @@ const got = require('got')
 const { encoder, decoder } = require('./buffer')
 
 class Live extends EventEmitter {
-  constructor(roomid) {
+  constructor({ roomid, shortId }) {
     if (typeof roomid !== 'number' || Number.isNaN(roomid)) {
       throw new Error(`roomid ${roomid} must be Number not NaN`)
     }
@@ -15,6 +15,7 @@ class Live extends EventEmitter {
     super()
 
     this.online = 0
+    this.shortId = shortId
 
     this.on('message', async buffer => {
       const packs = await decoder(buffer)
@@ -63,7 +64,7 @@ class Live extends EventEmitter {
   }
 
   async init(roomid) {
-    if (roomid < 10000) {
+    if (roomid < 10000 && this.shortId) {
       const { body: { data: { room_id: longRoomid } } } = await got(`https://api.live.bilibili.com/room/v1/Room/room_init?id=${roomid}`, { json: true })
       this.roomid = longRoomid
     } else {
@@ -85,9 +86,10 @@ class LiveWS extends Live {
   /**
    * @param {number} roomid  房间号
    * @param {string} address WebSocket url
+   * @param {boolean} shortId 检测并处理短房间号
    */
-  constructor(roomid, address = 'wss://broadcastlv.chat.bilibili.com/sub') {
-    super(roomid)
+  constructor(roomid, address = 'wss://broadcastlv.chat.bilibili.com/sub', shortId = false) {
+    super({ roomid, shortId })
 
     this.address = address
   }
@@ -118,12 +120,13 @@ class LiveWS extends Live {
 
 class LiveTCP extends Live {
   /**
-   * @param {number} roomid 房间号
-   * @param {string} host   TCP Host
-   * @param {number} port   TCP 端口
+   * @param {number} roomid   房间号
+   * @param {string} host     TCP Host
+   * @param {number} port     TCP 端口
+   * @param {boolean} shortId 检测并处理短房间号
    */
-  constructor(roomid, host = 'broadcastlv.chat.bilibili.com', port = 2243) {
-    super(roomid)
+  constructor(roomid, host = 'broadcastlv.chat.bilibili.com', port = 2243, shortId = false) {
+    super({ roomid, shortId })
 
     this.port = port
     this.host = host
