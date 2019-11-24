@@ -3,11 +3,11 @@
 /* global it */
 const { once } = require('events')
 
-const { LiveWS, LiveTCP } = require('..')
+const { LiveWS, LiveTCP, KeepLiveWS, KeepLiveTCP } = require('..')
 
 const { assert } = require('chai')
 
-Object.entries({ LiveWS, LiveTCP })
+Object.entries({ LiveWS, LiveTCP, KeepLiveWS, KeepLiveTCP })
   .forEach(([name, Live]) => {
     describe(name, function() {
       this.timeout(1000 * 25)
@@ -61,26 +61,36 @@ Object.entries({ LiveWS, LiveTCP })
           live.close()
           return assert.isAbove(online, 0)
         })
-        it('close on error', async function() {
-          const live = new Live(12235923)
-          await once(live, 'heartbeat')
-          const close = await new Promise(resolve => {
-            live.on('close', () => resolve('closed'))
-            live.on('error', () => {})
-            live.emit('_error')
+        if (name.includes('Keep')) {
+          it('close and reopen', async function() {
+            const live = new Live(12235923)
+            await once(live, 'live')
+            live.connection.close()
+            await once(live, 'live')
+            live.close()
           })
-          return assert.strictEqual(close, 'closed')
-        })
+        } else {
+          it('close on error', async function() {
+            const live = new Live(12235923)
+            await once(live, 'heartbeat')
+            const close = await new Promise(resolve => {
+              live.on('close', () => resolve('closed'))
+              live.on('error', () => {})
+              live.emit('_error')
+            })
+            return assert.strictEqual(close, 'closed')
+          })
+        }
       })
       context('options', function() {
-        if (name === 'LiveWS') {
+        if (name.includes('WS')) {
           it('address', async function() {
             const live = new Live(12235923, 'wss://broadcastlv.chat.bilibili.com:2245/sub')
             const [online] = await once(live, 'heartbeat')
             live.close()
             return assert.isAbove(online, 0)
           })
-        } else if (name === 'LiveTCP') {
+        } else if (name.includes('TCP')) {
           it('host, port', async function() {
             const live = new Live(12235923, 'tx-tokyo-live-comet-01.chat.bilibili.com', 2243)
             const [online] = await once(live, 'heartbeat')

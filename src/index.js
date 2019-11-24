@@ -5,7 +5,16 @@ const WebSocket = require('ws')
 
 const { encoder, decoder } = require('./buffer')
 
-class Live extends EventEmitter {
+const relayEvent = Symbol('relay')
+
+class NiceEventEmitter extends EventEmitter {
+  emit(...params) {
+    super.emit(...params)
+    super.emit(relayEvent, ...params)
+  }
+}
+
+class Live extends NiceEventEmitter {
   constructor(roomid) {
     if (typeof roomid !== 'number' || Number.isNaN(roomid)) {
       throw new Error(`roomid ${roomid} must be Number not NaN`)
@@ -138,4 +147,51 @@ class LiveTCP extends Live {
   }
 }
 
-module.exports = { LiveWS, LiveTCP }
+const { KLiveWS, KLiveTCP } = Object.fromEntries(Object.entries({ KLiveWS: LiveWS, KLiveTCP: LiveTCP }).map(([name, Base]) => [name, class extends EventEmitter {
+  constructor(...params) {
+    super()
+    this.params = params
+    this.closed = false
+    this.connect()
+  }
+
+  connect() {
+    const connection = new Base(...this.params)
+    this.connection = connection
+
+    connection.on(relayEvent, (...params) => this.emit(...params))
+
+    connection.on('error', e => this.emit('e', e))
+    connection.on('close', () => {
+      if (!this.closed) {
+        this.connect()
+      }
+    })
+  }
+
+  get online() {
+    return this.connection.online
+  }
+
+  get roomid() {
+    return this.connection.roomid
+  }
+
+  close() {
+    this.closed = true
+    this.connection.close()
+  }
+
+  heartbeat() {
+    return this.connection.heartbeat()
+  }
+
+  getOnline() {
+    return this.connection.getOnline()
+  }
+}]))
+
+class KeepLiveWS extends KLiveWS {}
+class KeepLiveTCP extends KLiveTCP {}
+
+module.exports = { LiveWS, LiveTCP, KeepLiveWS, KeepLiveTCP }
