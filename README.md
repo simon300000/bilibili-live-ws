@@ -5,7 +5,7 @@ Bilibili 直播 WebSocket/TCP API
 ## API
 
 ```javascript
-const { LiveWS, LiveTCP } = require('bilibili-live-ws')
+const { LiveWS, LiveTCP, KeepLiveWS, KeepLiveTCP } = require('bilibili-live-ws')
 const live = new LiveWS(roomid)
 // 或
 const live = new LiveTCP(roomid)
@@ -39,9 +39,9 @@ live.on('live', () => {
 
 > 晚上做梦梦到一个白胡子的老爷爷和我说TCP更节约内存哦！
 
-## Class: LiveWS / LiveTCP
+## Class: LiveWS / LiveTCP / KeepLiveWS / KeepLiveTCP
 
-LiveWS 和 LiveTCP 的大部分API基本上一样, 区别在本文末尾有注明
+(Keep)LiveWS 和 (Keep)LiveTCP 的大部分API基本上一样, 区别在本文末尾有注明
 
 ### new LiveWS(roomid [, address])
 
@@ -185,6 +185,24 @@ WebSocket/TCP收到的Raw Buffer（不推荐直接使用）
 #### live.send(buffer)
 
 使用 WebSocket 或者 TCP 发送信息
+
+<hr>
+
+### Keep和无Keep的区别
+
+KeepLiveWS 和 KeepLiveTCP 有断线重新连接的功能
+
+#### new KeepLiveWS(roomid [, address])
+
+#### new KeepLiveTCP(roomid [, host, port])
+
+所有上方的API都是一样的, 只不过会有以下微小的区别
+
+* 收到error或者close事件的时候并不代表连接关闭, 必须要手动调用`live.close()`来关闭连接
+* 内部的连接对象(`LiveWS`/`LiveTCP`)在`live.connection`中
+* 内部的连接关闭了之后, 如果不是因为`live.close()`关闭, 会在100毫秒之后自动打开一个新的连接。
+  * 这个100毫秒可以通过改变`live.interval`来设置
+* 内部的boolean, `live.closed`, 用于判断是否是因为`live.close()`关闭。
 
 <hr>
 
