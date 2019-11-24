@@ -152,6 +152,7 @@ const { KLiveWS, KLiveTCP } = Object.fromEntries(Object.entries({ KLiveWS: LiveW
     super()
     this.params = params
     this.closed = false
+    this.interval = 100
     this.connect()
   }
 
@@ -164,7 +165,7 @@ const { KLiveWS, KLiveTCP } = Object.fromEntries(Object.entries({ KLiveWS: LiveW
     connection.on('error', e => this.emit('e', e))
     connection.on('close', () => {
       if (!this.closed) {
-        this.connect()
+        setTimeout(() => this.connect(), this.interval)
       }
     })
   }
@@ -188,6 +189,10 @@ const { KLiveWS, KLiveTCP } = Object.fromEntries(Object.entries({ KLiveWS: LiveW
 
   getOnline() {
     return this.connection.getOnline()
+  }
+
+  send(...params) {
+    return this.connection.send(...params)
   }
 }]))
 
