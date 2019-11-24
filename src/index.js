@@ -153,12 +153,18 @@ const { KLiveWS, KLiveTCP } = Object.fromEntries(Object.entries({ KLiveWS: LiveW
     this.params = params
     this.closed = false
     this.interval = 100
+    this.timeout = 45 * 1000
     this.connect()
   }
 
   connect() {
     const connection = new Base(...this.params)
     this.connection = connection
+
+    let timeout = setTimeout(() => {
+      connection.close()
+      connection.emit('timeout')
+    }, this.timeout)
 
     connection.on(relayEvent, (...params) => this.emit(...params))
 
@@ -167,6 +173,18 @@ const { KLiveWS, KLiveTCP } = Object.fromEntries(Object.entries({ KLiveWS: LiveW
       if (!this.closed) {
         setTimeout(() => this.connect(), this.interval)
       }
+    })
+
+    connection.on('heartbeat', () => {
+      clearTimeout(timeout)
+      timeout = setTimeout(() => {
+        connection.close()
+        connection.emit('timeout')
+      }, this.timeout)
+    })
+
+    connection.on('close', () => {
+      clearTimeout(timeout)
     })
   }
 
