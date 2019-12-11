@@ -92,7 +92,7 @@ Object.entries({ LiveWS, LiveTCP, KeepLiveWS, KeepLiveTCP })
           })
         } else if (name.includes('TCP')) {
           it('host, port', async function() {
-            const live = new Live(12235923, 'tx-tokyo-live-comet-01.chat.bilibili.com', 2243)
+            const live = new Live(12235923, 'broadcastlv.chat.bilibili.com', 2243)
             const [online] = await once(live, 'heartbeat')
             live.close()
             return assert.isAbove(online, 0)
