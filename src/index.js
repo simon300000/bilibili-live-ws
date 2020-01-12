@@ -147,7 +147,7 @@ class LiveTCP extends Live {
   }
 }
 
-const { KLiveWS, KLiveTCP } = Object.fromEntries(Object.entries({ KLiveWS: LiveWS, KLiveTCP: LiveTCP }).map(([name, Base]) => [name, class extends EventEmitter {
+const keepLive = Base => class extends EventEmitter {
   constructor(...params) {
     super()
     this.params = params
@@ -212,9 +212,9 @@ const { KLiveWS, KLiveTCP } = Object.fromEntries(Object.entries({ KLiveWS: LiveW
   send(...params) {
     return this.connection.send(...params)
   }
-}]))
+}
 
-class KeepLiveWS extends KLiveWS {}
-class KeepLiveTCP extends KLiveTCP {}
+class KeepLiveWS extends keepLive(LiveWS) {}
+class KeepLiveTCP extends keepLive(LiveTCP) {}
 
 module.exports = { LiveWS, LiveTCP, KeepLiveWS, KeepLiveTCP }
