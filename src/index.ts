@@ -1,3 +1,4 @@
+export {}
 const EventEmitter = require('events')
 const net = require('net')
 
@@ -8,6 +9,7 @@ const { encoder, decoder } = require('./buffer')
 const relayEvent = Symbol('relay')
 
 class NiceEventEmitter extends EventEmitter {
+    // @ts-ignore
   emit(...params) {
     super.emit(...params)
     super.emit(relayEvent, ...params)
@@ -15,6 +17,7 @@ class NiceEventEmitter extends EventEmitter {
 }
 
 class Live extends NiceEventEmitter {
+    // @ts-ignore
   constructor(roomid) {
     if (typeof roomid !== 'number' || Number.isNaN(roomid)) {
       throw new Error(`roomid ${roomid} must be Number not NaN`)
@@ -24,8 +27,10 @@ class Live extends NiceEventEmitter {
     this.roomid = roomid
     this.online = 0
 
+    // @ts-ignore
     this.on('message', async buffer => {
       const packs = await decoder(buffer)
+    // @ts-ignore
       packs.forEach(pack => {
         const { type, data } = pack
         if (type === 'welcome') {
@@ -62,6 +67,7 @@ class Live extends NiceEventEmitter {
       clearTimeout(this.timeout)
     })
 
+    // @ts-ignore
     this.on('_error', (...params) => {
       this.close()
       this.emit('error', ...params)
@@ -83,17 +89,23 @@ class LiveWS extends Live {
    * @param {number} roomid  房间号
    * @param {string} address WebSocket url
    */
+    // @ts-ignore
   constructor(roomid, address = 'wss://broadcastlv.chat.bilibili.com/sub') {
     super(roomid)
 
     const ws = new WebSocket(address)
     this.ws = ws
 
+    // @ts-ignore
     ws.on('open', (...params) => this.emit('open', ...params))
+    // @ts-ignore
     ws.on('message', (...params) => this.emit('message', ...params))
+    // @ts-ignore
     ws.on('close', (...params) => this.emit('close', ...params))
+    // @ts-ignore
     ws.on('error', (...params) => this.emit('_error', ...params))
 
+    // @ts-ignore
     this.send = data => {
       if (ws.readyState === 1) {
         ws.send(data)
@@ -112,6 +124,7 @@ class LiveTCP extends Live {
    * @param {string} host   TCP Host
    * @param {number} port   TCP 端口
    */
+    // @ts-ignore
   constructor(roomid, host = 'broadcastlv.chat.bilibili.com', port = 2243) {
     super(roomid)
 
@@ -119,15 +132,20 @@ class LiveTCP extends Live {
     this.socket = socket
     this.buffer = Buffer.alloc(0)
 
+    // @ts-ignore
     socket.on('ready', (...params) => this.emit('open', ...params))
+    // @ts-ignore
     socket.on('close', (...params) => this.emit('close', ...params))
+    // @ts-ignore
     socket.on('error', (...params) => this.emit('_error', ...params))
 
+    // @ts-ignore
     socket.on('data', buffer => {
       this.buffer = Buffer.concat([this.buffer, buffer])
       this.splitBuffer()
     })
 
+    // @ts-ignore
     this.send = data => {
       socket.write(data)
     }
@@ -147,7 +165,9 @@ class LiveTCP extends Live {
   }
 }
 
+    // @ts-ignore
 const keepLive = Base => class extends EventEmitter {
+    // @ts-ignore
   constructor(...params) {
     super()
     this.params = params
@@ -166,8 +186,10 @@ const keepLive = Base => class extends EventEmitter {
       connection.emit('timeout')
     }, this.timeout)
 
+    // @ts-ignore
     connection.on(relayEvent, (...params) => this.emit(...params))
 
+    // @ts-ignore
     connection.on('error', e => this.emit('e', e))
     connection.on('close', () => {
       if (!this.closed) {
@@ -209,6 +231,7 @@ const keepLive = Base => class extends EventEmitter {
     return this.connection.getOnline()
   }
 
+    // @ts-ignore
   send(...params) {
     return this.connection.send(...params)
   }

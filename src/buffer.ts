@@ -1,3 +1,4 @@
+export { }
 const { inflate } = require('zlib')
 const { promisify } = require('util')
 const inflateAsync = promisify(inflate)
@@ -6,9 +7,9 @@ const blank = Buffer.alloc(16)
 
 // https://github.com/lovelyyoshino/Bilibili-Live-API/blob/master/API.WebSocket.md
 
-const decoder = async buffer => {
-  const packs = []
-  let size
+const decoder = async (buffer: Buffer) => {
+  const packs: Buffer[] = []
+  let size: number
   for (let i = 0; i < buffer.length; i += size) {
     size = buffer.readInt32BE(i)
     packs.push(buffer.slice(i, i + size))
@@ -43,12 +44,16 @@ const decoder = async buffer => {
     }
 
     const pack = { buf, type, protocol, data }
+    // @ts-ignore
     packs[i] = pack
   }
 
+    // @ts-ignore
   let realPack = []
   for (let i = 0; i < packs.length; i++) {
+    // @ts-ignore
     if (packs[i].protocol === 2) {
+    // @ts-ignore
       realPack = realPack.concat(packs[i].data)
     } else {
       realPack.push(packs[i])
@@ -57,6 +62,7 @@ const decoder = async buffer => {
   return realPack
 }
 
+    // @ts-ignore
 const encoder = ({ type, body = '' }) => {
   if (typeof body !== 'string') {
     body = JSON.stringify(body)
