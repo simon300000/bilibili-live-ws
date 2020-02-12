@@ -21,7 +21,10 @@ class Live extends NiceEventEmitter {
   live: boolean
   timeout: ReturnType<typeof setTimeout>
 
-  constructor(roomid: number) {
+  send: (data: Buffer) => void
+  close: () => void
+
+  constructor(roomid: number, { send, close }: { send: (data: Buffer) => void, close: () => void }) {
     if (typeof roomid !== 'number' || Number.isNaN(roomid)) {
       throw new Error(`roomid ${roomid} must be Number not NaN`)
     }
@@ -32,6 +35,9 @@ class Live extends NiceEventEmitter {
     this.live = false
     this.timeout = setTimeout(() => { }, 0)
 
+    this.send = send
+    this.close = close
+
     this.on('message', async buffer => {
       const packs = await decoder(buffer)
       packs.forEach(pack => {
@@ -39,7 +45,6 @@ class Live extends NiceEventEmitter {
         if (type === 'welcome') {
           this.live = true
           this.emit('live')
-          //@ts-ignore
           this.send(encoder('heartbeat'))
         }
         if (type === 'heartbeat') {
@@ -64,7 +69,6 @@ class Live extends NiceEventEmitter {
 
     this.on('open', () => {
       const buf = encoder('join', { uid: 0, roomid, protover: 2, platform: 'web', clientver: '1.8.5', type: 2 })
-      //@ts-ignore
       this.send(buf)
     })
 
@@ -73,14 +77,12 @@ class Live extends NiceEventEmitter {
     })
 
     this.on('_error', (...params) => {
-      //@ts-ignore
       this.close()
       this.emit('error', ...params)
     })
   }
 
   heartbeat() {
-    //@ts-ignore
     this.send(encoder('heartbeat'))
   }
 
@@ -96,55 +98,50 @@ interface LiveUpstream {
 
 export class LiveWS extends Live implements LiveUpstream {
   ws: WebSocket
-  send: (data: Buffer) => void
 
   constructor(roomid: number, address = 'wss://broadcastlv.chat.bilibili.com/sub') {
-    super(roomid)
-
     const ws = new WebSocket(address)
-    this.ws = ws
+    const send = (data: Buffer) => {
+      if (ws.readyState === 1) {
+        ws.send(data)
+      }
+    }
+    const close = () => this.ws.close()
+
+    super(roomid, { send, close })
 
     ws.on('open', (...params) => this.emit('open', ...params))
     ws.on('message', (...params) => this.emit('message', ...params))
     ws.on('close', (...params) => this.emit('close', ...params))
     ws.on('error', (...params) => this.emit('_error', ...params))
 
-    this.send = (data) => {
-      if (ws.readyState === 1) {
-        ws.send(data)
-      }
-    }
-  }
-
-  close() {
-    this.ws.close()
+    this.ws = ws
   }
 }
 
 export class LiveTCP extends Live implements LiveUpstream {
   socket: Socket
   buffer: Buffer
-  send: (data: Buffer) => void
 
   constructor(roomid: number, host = 'broadcastlv.chat.bilibili.com', port = 2243) {
-    super(roomid)
-
     const socket = net.connect(port, host)
-    this.socket = socket
+    const send = (data: Buffer) => {
+      socket.write(data)
+    }
+    const close = () => this.socket.end()
+
+    super(roomid, { send, close })
+
     this.buffer = Buffer.alloc(0)
 
     socket.on('ready', (...params) => this.emit('open', ...params))
     socket.on('close', (...params) => this.emit('close', ...params))
     socket.on('error', (...params) => this.emit('_error', ...params))
-
     socket.on('data', buffer => {
       this.buffer = Buffer.concat([this.buffer, buffer])
       this.splitBuffer()
     })
-
-    this.send = data => {
-      socket.write(data)
-    }
+    this.socket = socket
   }
 
   splitBuffer() {
@@ -154,10 +151,6 @@ export class LiveTCP extends Live implements LiveUpstream {
       this.buffer = this.buffer.slice(size)
       this.emit('message', pack)
     }
-  }
-
-  close() {
-    this.socket.end()
   }
 }
 
