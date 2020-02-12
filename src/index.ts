@@ -1,24 +1,27 @@
-export {}
-const EventEmitter = require('events')
-const net = require('net')
+import { EventEmitter } from 'events'
+import net, { Socket } from 'net'
 
-const WebSocket = require('ws')
+import WebSocket from 'ws'
 
-const { encoder, decoder } = require('./buffer')
+import { encoder, decoder } from './buffer'
 
 const relayEvent = Symbol('relay')
 
 class NiceEventEmitter extends EventEmitter {
-    // @ts-ignore
-  emit(...params) {
-    super.emit(...params)
-    super.emit(relayEvent, ...params)
+  emit(eventName: string, ...params: any[]) {
+    super.emit(eventName, ...params)
+    super.emit(relayEvent, eventName, ...params)
+    return true
   }
 }
 
 class Live extends NiceEventEmitter {
-    // @ts-ignore
-  constructor(roomid) {
+  roomid: number
+  online: number
+  live: boolean
+  timeout: ReturnType<typeof setTimeout>
+
+  constructor(roomid: number) {
     if (typeof roomid !== 'number' || Number.isNaN(roomid)) {
       throw new Error(`roomid ${roomid} must be Number not NaN`)
     }
@@ -26,17 +29,18 @@ class Live extends NiceEventEmitter {
     super()
     this.roomid = roomid
     this.online = 0
+    this.live = false
+    this.timeout = setTimeout(() => { }, 0)
 
-    // @ts-ignore
     this.on('message', async buffer => {
       const packs = await decoder(buffer)
-    // @ts-ignore
       packs.forEach(pack => {
         const { type, data } = pack
         if (type === 'welcome') {
           this.live = true
           this.emit('live')
-          this.send(encoder({ type: 'heartbeat' }))
+          //@ts-ignore
+          this.send(encoder('heartbeat'))
         }
         if (type === 'heartbeat') {
           this.online = data
@@ -59,7 +63,8 @@ class Live extends NiceEventEmitter {
     })
 
     this.on('open', () => {
-      const buf = encoder({ type: 'join', body: { uid: 0, roomid, protover: 2, platform: 'web', clientver: '1.8.5', type: 2 } })
+      const buf = encoder('join', { uid: 0, roomid, protover: 2, platform: 'web', clientver: '1.8.5', type: 2 })
+      //@ts-ignore
       this.send(buf)
     })
 
@@ -67,15 +72,16 @@ class Live extends NiceEventEmitter {
       clearTimeout(this.timeout)
     })
 
-    // @ts-ignore
     this.on('_error', (...params) => {
+      //@ts-ignore
       this.close()
       this.emit('error', ...params)
     })
   }
 
   heartbeat() {
-    this.send(encoder({ type: 'heartbeat' }))
+    //@ts-ignore
+    this.send(encoder('heartbeat'))
   }
 
   getOnline() {
@@ -84,29 +90,26 @@ class Live extends NiceEventEmitter {
   }
 }
 
-class LiveWS extends Live {
-  /**
-   * @param {number} roomid  房间号
-   * @param {string} address WebSocket url
-   */
-    // @ts-ignore
-  constructor(roomid, address = 'wss://broadcastlv.chat.bilibili.com/sub') {
+interface LiveUpstream {
+  send(data: Buffer): void
+}
+
+export class LiveWS extends Live implements LiveUpstream {
+  ws: WebSocket
+  send: (data: Buffer) => void
+
+  constructor(roomid: number, address = 'wss://broadcastlv.chat.bilibili.com/sub') {
     super(roomid)
 
     const ws = new WebSocket(address)
     this.ws = ws
 
-    // @ts-ignore
     ws.on('open', (...params) => this.emit('open', ...params))
-    // @ts-ignore
     ws.on('message', (...params) => this.emit('message', ...params))
-    // @ts-ignore
     ws.on('close', (...params) => this.emit('close', ...params))
-    // @ts-ignore
     ws.on('error', (...params) => this.emit('_error', ...params))
 
-    // @ts-ignore
-    this.send = data => {
+    this.send = (data) => {
       if (ws.readyState === 1) {
         ws.send(data)
       }
@@ -118,34 +121,27 @@ class LiveWS extends Live {
   }
 }
 
-class LiveTCP extends Live {
-  /**
-   * @param {number} roomid 房间号
-   * @param {string} host   TCP Host
-   * @param {number} port   TCP 端口
-   */
-    // @ts-ignore
-  constructor(roomid, host = 'broadcastlv.chat.bilibili.com', port = 2243) {
+export class LiveTCP extends Live implements LiveUpstream {
+  socket: Socket
+  buffer: Buffer
+  send: (data: Buffer) => void
+
+  constructor(roomid: number, host = 'broadcastlv.chat.bilibili.com', port = 2243) {
     super(roomid)
 
     const socket = net.connect(port, host)
     this.socket = socket
     this.buffer = Buffer.alloc(0)
 
-    // @ts-ignore
     socket.on('ready', (...params) => this.emit('open', ...params))
-    // @ts-ignore
     socket.on('close', (...params) => this.emit('close', ...params))
-    // @ts-ignore
     socket.on('error', (...params) => this.emit('_error', ...params))
 
-    // @ts-ignore
     socket.on('data', buffer => {
       this.buffer = Buffer.concat([this.buffer, buffer])
       this.splitBuffer()
     })
 
-    // @ts-ignore
     this.send = data => {
       socket.write(data)
     }
@@ -165,10 +161,16 @@ class LiveTCP extends Live {
   }
 }
 
-    // @ts-ignore
-const keepLive = Base => class extends EventEmitter {
-    // @ts-ignore
-  constructor(...params) {
+const keepLive = <B = LiveTCP | LiveWS>(Base: B) => class extends EventEmitter {
+  //@ts-ignore
+  params: ConstructorParameters<B>
+  closed: boolean
+  interval: number
+  timeout: number
+  connection?: B
+
+  //@ts-ignore
+  constructor(...params: ConstructorParameters<B>) {
     super()
     this.params = params
     this.closed = false
@@ -178,6 +180,7 @@ const keepLive = Base => class extends EventEmitter {
   }
 
   connect() {
+    //@ts-ignore
     const connection = new Base(...this.params)
     this.connection = connection
 
@@ -186,11 +189,9 @@ const keepLive = Base => class extends EventEmitter {
       connection.emit('timeout')
     }, this.timeout)
 
-    // @ts-ignore
-    connection.on(relayEvent, (...params) => this.emit(...params))
+    connection.on(relayEvent, (eventName: string, ...params: any[]) => this.emit(eventName, ...params))
 
-    // @ts-ignore
-    connection.on('error', e => this.emit('e', e))
+    connection.on('error', (e: any) => this.emit('e', e))
     connection.on('close', () => {
       if (!this.closed) {
         setTimeout(() => this.connect(), this.interval)
@@ -211,33 +212,36 @@ const keepLive = Base => class extends EventEmitter {
   }
 
   get online() {
-    return this.connection.online
+    //@ts-ignore
+    return this.connection?.online
   }
 
   get roomid() {
-    return this.connection.roomid
+    //@ts-ignore
+    return this.connection?.roomid
   }
 
   close() {
     this.closed = true
+    // @ts-ignore
     this.connection.close()
   }
 
   heartbeat() {
+    // @ts-ignore
     return this.connection.heartbeat()
   }
 
   getOnline() {
+    // @ts-ignore
     return this.connection.getOnline()
   }
 
+  send(data: Buffer) {
     // @ts-ignore
-  send(...params) {
-    return this.connection.send(...params)
+    return this.connection.send(data)
   }
 }
 
-class KeepLiveWS extends keepLive(LiveWS) {}
-class KeepLiveTCP extends keepLive(LiveTCP) {}
-
-module.exports = { LiveWS, LiveTCP, KeepLiveWS, KeepLiveTCP }
+export class KeepLiveWS extends keepLive(LiveWS) { }
+export class KeepLiveTCP extends keepLive(LiveTCP) { }

@@ -1,11 +1,9 @@
-/* global describe */
-/* global context */
-/* global it */
-const { once } = require('events')
+import { once } from 'events'
 
-const { LiveWS, LiveTCP, KeepLiveWS, KeepLiveTCP } = require('..')
+import { assert } from 'chai'
 
-const { assert } = require('chai')
+import { LiveWS, LiveTCP, KeepLiveWS, KeepLiveTCP } from '..'
+
 
 Object.entries({ LiveWS, LiveTCP, KeepLiveWS, KeepLiveTCP })
   .forEach(([name, Live]) => {
@@ -19,6 +17,7 @@ Object.entries({ LiveWS, LiveTCP, KeepLiveWS, KeepLiveTCP })
           return assert.isAbove(online, 0)
         })
         it('roomid must be number', function() {
+          //@ts-ignore
           return assert.throw(() => new Live('12235923'))
         })
         it('roomid can not be NaN', function() {
@@ -65,6 +64,7 @@ Object.entries({ LiveWS, LiveTCP, KeepLiveWS, KeepLiveTCP })
           it('close and reopen', async function() {
             const live = new Live(12235923)
             await once(live, 'live')
+            //@ts-ignore
             live.connection.close()
             await once(live, 'live')
             live.close()
@@ -75,7 +75,7 @@ Object.entries({ LiveWS, LiveTCP, KeepLiveWS, KeepLiveTCP })
             await once(live, 'heartbeat')
             const close = await new Promise(resolve => {
               live.on('close', () => resolve('closed'))
-              live.on('error', () => {})
+              live.on('error', () => { })
               live.emit('_error')
             })
             return assert.strictEqual(close, 'closed')

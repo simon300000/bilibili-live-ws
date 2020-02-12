@@ -1,1 +1,2 @@
-module.exports = require('./src')
+import * as bilibiliLiveWS from './src'
+export = bilibiliLiveWS

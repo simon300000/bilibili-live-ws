@@ -1,69 +1,61 @@
-export { }
-const { inflate } = require('zlib')
-const { promisify } = require('util')
-const inflateAsync = promisify(inflate)
+import { inflate } from 'zlib'
+import { promisify } from 'util'
+
+const inflateAsync = promisify<Parameters<typeof inflate>[0], Parameters<Parameters<typeof inflate>[2]>[1]>(inflate)
 
 const blank = Buffer.alloc(16)
 
 // https://github.com/lovelyyoshino/Bilibili-Live-API/blob/master/API.WebSocket.md
 
-const decoder = async (buffer: Buffer) => {
-  const packs: Buffer[] = []
+const cutBuffer = (buffer: Buffer) => {
+  const bufferPacks: Buffer[] = []
   let size: number
   for (let i = 0; i < buffer.length; i += size) {
     size = buffer.readInt32BE(i)
-    packs.push(buffer.slice(i, i + size))
+    bufferPacks.push(buffer.slice(i, i + size))
   }
-  for (let i = 0; i < packs.length; i++) {
-    const buf = packs[i]
-
-    const body = buf.slice(16)
-    const protocol = buf.readInt16BE(6)
-    const operation = buf.readInt32BE(8)
-
-    let type
-    if (operation === 3) {
-      type = 'heartbeat'
-    }
-    if (operation === 5) {
-      type = 'message'
-    }
-    if (operation === 8) {
-      type = 'welcome'
-    }
-
-    let data
-    if (protocol === 0) {
-      data = JSON.parse(String(body))
-    }
-    if (protocol === 1 && body.length === 4) {
-      data = body.readUIntBE(0, 4)
-    }
-    if (protocol === 2) {
-      data = await decoder((await inflateAsync(body)))
-    }
-
-    const pack = { buf, type, protocol, data }
-    // @ts-ignore
-    packs[i] = pack
-  }
-
-    // @ts-ignore
-  let realPack = []
-  for (let i = 0; i < packs.length; i++) {
-    // @ts-ignore
-    if (packs[i].protocol === 2) {
-    // @ts-ignore
-      realPack = realPack.concat(packs[i].data)
-    } else {
-      realPack.push(packs[i])
-    }
-  }
-  return realPack
+  return bufferPacks
 }
 
-    // @ts-ignore
-const encoder = ({ type, body = '' }) => {
+export const decoder = async (buffer: Buffer) => {
+  const packs = await Promise.all(cutBuffer(buffer)
+    .map(async buf => {
+      const body = buf.slice(16)
+      const protocol = buf.readInt16BE(6)
+      const operation = buf.readInt32BE(8)
+
+      let type = 'unknow'
+      if (operation === 3) {
+        type = 'heartbeat'
+      } else if (operation === 5) {
+        type = 'message'
+      } else if (operation === 8) {
+        type = 'welcome'
+      }
+
+      let data: any
+      if (protocol === 0) {
+        data = JSON.parse(String(body))
+      }
+      if (protocol === 1 && body.length === 4) {
+        data = body.readUIntBE(0, 4)
+      }
+      if (protocol === 2) {
+        data = await decoder((await inflateAsync(body)))
+      }
+
+      return { buf, type, protocol, data }
+    }))
+
+  return packs.flatMap(pack => {
+    if (pack.protocol === 2) {
+      return pack.data
+    }
+    return pack
+  })
+}
+
+export const encoder = (type: string, body: any = '') => {
   if (typeof body !== 'string') {
     body = JSON.stringify(body)
   }
@@ -82,5 +74,3 @@ const encoder = ({ type, body = '' }) => {
   head.writeInt32BE(1, 12)
   return Buffer.concat([head, buffer])
 }
-
-module.exports = { encoder, decoder }
