@@ -43,9 +43,9 @@ live.on('live', () => {
 
 (Keep)LiveWS 和 (Keep)LiveTCP 的大部分API基本上一样, 区别在本文末尾有注明
 
-### new LiveWS(roomid [, address])
+### new LiveWS(roomid [, { address }])
 
-### new LiveTCP(roomid [, host, port])
+### new LiveTCP(roomid [, { host, port }])
 
 - `roomid` 房间号
 
@@ -192,9 +192,9 @@ WebSocket/TCP收到的Raw Buffer（不推荐直接使用）
 
 KeepLiveWS 和 KeepLiveTCP 有断线重新连接的功能
 
-#### new KeepLiveWS(roomid [, address])
+#### new KeepLiveWS(roomid [, { address }])
 
-#### new KeepLiveTCP(roomid [, host, port])
+#### new KeepLiveTCP(roomid [, { host, port }])
 
 所有上方的API都是一样的, 只不过会有以下微小的区别
 

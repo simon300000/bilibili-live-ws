@@ -58,6 +58,7 @@ Object.entries({ LiveWS, LiveTCP, KeepLiveWS, KeepLiveTCP })
           await once(live, 'live')
           const online = await live.getOnline()
           live.close()
+          //@ts-ignore
           return assert.isAbove(online, 0)
         })
         if (name.includes('Keep')) {
@@ -85,14 +86,14 @@ Object.entries({ LiveWS, LiveTCP, KeepLiveWS, KeepLiveTCP })
       context('options', function() {
         if (name.includes('WS')) {
           it('address', async function() {
-            const live = new Live(12235923, 'wss://broadcastlv.chat.bilibili.com:2245/sub')
+            const live = new Live(12235923, { address: 'wss://broadcastlv.chat.bilibili.com:2245/sub' })
             const [online] = await once(live, 'heartbeat')
             live.close()
             return assert.isAbove(online, 0)
           })
         } else if (name.includes('TCP')) {
           it('host, port', async function() {
-            const live = new Live(12235923, 'broadcastlv.chat.bilibili.com', 2243)
+            const live = new Live(12235923, { host: 'broadcastlv.chat.bilibili.com', port: 2243 })
             const [online] = await once(live, 'heartbeat')
             live.close()
             return assert.isAbove(online, 0)

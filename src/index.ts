@@ -92,14 +92,10 @@ class Live extends NiceEventEmitter {
   }
 }
 
-interface LiveUpstream {
-  send(data: Buffer): void
-}
-
-export class LiveWS extends Live implements LiveUpstream {
+export class LiveWS extends Live {
   ws: WebSocket
 
-  constructor(roomid: number, address = 'wss://broadcastlv.chat.bilibili.com/sub') {
+  constructor(roomid: number, { address = 'wss://broadcastlv.chat.bilibili.com/sub' } = {}) {
     const ws = new WebSocket(address)
     const send = (data: Buffer) => {
       if (ws.readyState === 1) {
@@ -119,11 +115,11 @@ export class LiveWS extends Live implements LiveUpstream {
   }
 }
 
-export class LiveTCP extends Live implements LiveUpstream {
+export class LiveTCP extends Live {
   socket: Socket
   buffer: Buffer
 
-  constructor(roomid: number, host = 'broadcastlv.chat.bilibili.com', port = 2243) {
+  constructor(roomid: number, { host = 'broadcastlv.chat.bilibili.com', port = 2243 } = {}) {
     const socket = net.connect(port, host)
     const send = (data: Buffer) => {
       socket.write(data)
@@ -154,28 +150,28 @@ export class LiveTCP extends Live implements LiveUpstream {
   }
 }
 
-const keepLive = <B = LiveTCP | LiveWS>(Base: B) => class extends EventEmitter {
-  //@ts-ignore
-  params: ConstructorParameters<B>
+const keepLive = (Base: typeof LiveWS | typeof LiveTCP) => class extends EventEmitter {
+  params: [number, any?]
   closed: boolean
   interval: number
   timeout: number
-  connection?: B
+  connection: InstanceType<typeof Base>
 
-  //@ts-ignore
-  constructor(...params: ConstructorParameters<B>) {
+  constructor(...params: ConstructorParameters<typeof Base>) {
     super()
     this.params = params
     this.closed = false
     this.interval = 100
     this.timeout = 45 * 1000
-    this.connect()
+    this.connection = new Base(...this.params)
+    this.connect(false)
   }
 
-  connect() {
-    //@ts-ignore
-    const connection = new Base(...this.params)
-    this.connection = connection
+  connect(reconnect = true) {
+    if (reconnect) {
+      this.connection = new Base(...this.params)
+    }
+    const connection = this.connection
 
     let timeout = setTimeout(() => {
       connection.close()
@@ -205,33 +201,27 @@ const keepLive = <B = LiveTCP | LiveWS>(Base: B) => class extends EventEmitter {
   }
 
   get online() {
-    //@ts-ignore
-    return this.connection?.online
+    return this.connection.online
   }
 
   get roomid() {
-    //@ts-ignore
-    return this.connection?.roomid
+    return this.connection.roomid
   }
 
   close() {
     this.closed = true
-    // @ts-ignore
     this.connection.close()
   }
 
   heartbeat() {
-    // @ts-ignore
     return this.connection.heartbeat()
   }
 
   getOnline() {
-    // @ts-ignore
     return this.connection.getOnline()
   }
 
   send(data: Buffer) {
-    // @ts-ignore
     return this.connection.send(data)
   }
 }
