@@ -4,7 +4,6 @@ import { assert } from 'chai'
 
 import { LiveWS, LiveTCP, KeepLiveWS, KeepLiveTCP } from '..'
 
-
 Object.entries({ LiveWS, LiveTCP, KeepLiveWS, KeepLiveTCP })
   .forEach(([name, Live]) => {
     describe(name, function() {
@@ -82,6 +81,12 @@ Object.entries({ LiveWS, LiveTCP, KeepLiveWS, KeepLiveTCP })
         }
       })
       context('options', function() {
+        it('protover: 1', async function() {
+          const live = new Live(12235923, { protover: 1 })
+          const [online] = await once(live, 'heartbeat')
+          live.close()
+          return assert.isAbove(online, 0)
+        })
         if (name.includes('WS')) {
           it('address', async function() {
             const live = new Live(12235923, { address: 'wss://broadcastlv.chat.bilibili.com:2245/sub' })

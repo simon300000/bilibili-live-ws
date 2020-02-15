@@ -44,7 +44,7 @@ class Live extends NiceEventEmitter {
   send: (data: Buffer) => void
   close: () => void
 
-  constructor(roomid: number, { send, close }: { send: (data: Buffer) => void, close: () => void }) {
+  constructor(roomid: number, { send, close, protover }: { send: (data: Buffer) => void, close: () => void, protover: 1 | 2 }) {
     if (typeof roomid !== 'number' || Number.isNaN(roomid)) {
       throw new Error(`roomid ${roomid} must be Number not NaN`)
     }
@@ -88,7 +88,7 @@ class Live extends NiceEventEmitter {
     })
 
     this.on('open', () => {
-      const buf = encoder('join', { uid: 0, roomid, protover: 2, platform: 'web', clientver: '1.8.5', type: 2 })
+      const buf = encoder('join', { uid: 0, roomid, protover, platform: 'web', clientver: '1.8.5', type: 2 })
       this.send(buf)
     })
 
@@ -115,7 +115,7 @@ class Live extends NiceEventEmitter {
 export class LiveWS extends Live {
   ws: WebSocket
 
-  constructor(roomid: number, { address = 'wss://broadcastlv.chat.bilibili.com/sub' } = {}) {
+  constructor(roomid: number, { address = 'wss://broadcastlv.chat.bilibili.com/sub', protover = 2 }: { address?: string, protover?: 1 | 2 } = {}) {
     const ws = new WebSocket(address)
     const send = (data: Buffer) => {
       if (ws.readyState === 1) {
@@ -124,7 +124,7 @@ export class LiveWS extends Live {
     }
     const close = () => this.ws.close()
 
-    super(roomid, { send, close })
+    super(roomid, { send, close, protover })
 
     ws.on('open', (...params) => this.emit('open', ...params))
     ws.on('message', data => this.emit('message', data as Buffer))
@@ -139,14 +139,14 @@ export class LiveTCP extends Live {
   socket: Socket
   buffer: Buffer
 
-  constructor(roomid: number, { host = 'broadcastlv.chat.bilibili.com', port = 2243 } = {}) {
+  constructor(roomid: number, { host = 'broadcastlv.chat.bilibili.com', port = 2243, protover = 2 }: { host?: string, port?: number, protover?: 1 | 2 } = {}) {
     const socket = net.connect(port, host)
     const send = (data: Buffer) => {
       socket.write(data)
     }
     const close = () => this.socket.end()
 
-    super(roomid, { send, close })
+    super(roomid, { send, close, protover })
 
     this.buffer = Buffer.alloc(0)
 

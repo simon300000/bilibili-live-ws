@@ -43,9 +43,9 @@ live.on('live', () => {
 
 (Keep)LiveWS 和 (Keep)LiveTCP 的大部分API基本上一样, 区别在本文末尾有注明
 
-### new LiveWS(roomid [, { address }])
+### new LiveWS(roomid [, { address, protover }])
 
-### new LiveTCP(roomid [, { host, port }])
+### new LiveTCP(roomid [, { host, port, protover }])
 
 - `roomid` 房间号
 
@@ -53,15 +53,19 @@ live.on('live', () => {
   
 - `address` 可选, WebSocket连接的地址
 
-  默认 `wss://broadcastlv.chat.bilibili.com/sub`
+  默认 `'wss://broadcastlv.chat.bilibili.com/sub'`
 
 - `host` 可选, TCP连接的地址
 
-  默认 `broadcastlv.chat.bilibili.com`
+  默认 `'broadcastlv.chat.bilibili.com'`
 
 - `port` 可选, TCP连接的端口
 
   默认 `2243`
+  
+- `protover` 可选, 见 #17 
+
+  默认 `2`
 
 #### live.on('open')
 
@@ -192,9 +196,9 @@ WebSocket/TCP收到的Raw Buffer（不推荐直接使用）
 
 KeepLiveWS 和 KeepLiveTCP 有断线重新连接的功能
 
-#### new KeepLiveWS(roomid [, { address }])
+#### new KeepLiveWS(roomid [, { address, protover }])
 
-#### new KeepLiveTCP(roomid [, { host, port }])
+#### new KeepLiveTCP(roomid [, { host, port, protover }])
 
 所有上方的API都是一样的, 只不过会有以下微小的区别
 
