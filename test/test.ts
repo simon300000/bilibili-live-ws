@@ -58,14 +58,12 @@ Object.entries({ LiveWS, LiveTCP, KeepLiveWS, KeepLiveTCP })
           await once(live, 'live')
           const online = await live.getOnline()
           live.close()
-          //@ts-ignore
           return assert.isAbove(online, 0)
         })
         if (name.includes('Keep')) {
           it('close and reopen', async function() {
-            const live = new Live(12235923)
+            const live = new (Live as typeof KeepLiveWS | typeof KeepLiveTCP)(12235923)
             await once(live, 'live')
-            //@ts-ignore
             live.connection.close()
             await once(live, 'live')
             live.close()
@@ -77,7 +75,7 @@ Object.entries({ LiveWS, LiveTCP, KeepLiveWS, KeepLiveTCP })
             const close = await new Promise(resolve => {
               live.on('close', () => resolve('closed'))
               live.on('error', () => { })
-              live.emit('_error')
+              live.emit('_error', Error())
             })
             return assert.strictEqual(close, 'closed')
           })

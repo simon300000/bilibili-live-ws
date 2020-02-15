@@ -8,11 +8,31 @@ import { encoder, decoder } from './buffer'
 const relayEvent = Symbol('relay')
 
 class NiceEventEmitter extends EventEmitter {
-  emit(eventName: string, ...params: any[]) {
+  emit(eventName: string | symbol, ...params: any[]) {
     super.emit(eventName, ...params)
     super.emit(relayEvent, eventName, ...params)
     return true
   }
+}
+
+type EventMap = {
+  [relayEvent]: any[]
+  close: [number?, string?]
+  open: []
+  _error: [Error]
+  error: [Error]
+  live: []
+  msg: [any]
+  heartbeat: [number]
+  timeout: []
+  DANMU_MSG: [object]
+  message: [Buffer]
+}
+
+interface Live {
+  on<E extends keyof EventMap>(eventName: E, listener: (...data: EventMap[E]) => void): any
+  once<E extends keyof EventMap>(eventName: E, listener: (...data: EventMap[E]) => void): any
+  emit<E extends keyof EventMap>(eventName: E, ...data: EventMap[E]): boolean
 }
 
 class Live extends NiceEventEmitter {
@@ -76,9 +96,9 @@ class Live extends NiceEventEmitter {
       clearTimeout(this.timeout)
     })
 
-    this.on('_error', (...params) => {
+    this.on('_error', error => {
       this.close()
-      this.emit('error', ...params)
+      this.emit('error', error)
     })
   }
 
@@ -88,7 +108,7 @@ class Live extends NiceEventEmitter {
 
   getOnline() {
     this.heartbeat()
-    return new Promise(resolve => this.once('heartbeat', resolve))
+    return new Promise<number>(resolve => this.once('heartbeat', resolve))
   }
 }
 
@@ -107,9 +127,9 @@ export class LiveWS extends Live {
     super(roomid, { send, close })
 
     ws.on('open', (...params) => this.emit('open', ...params))
-    ws.on('message', (...params) => this.emit('message', ...params))
-    ws.on('close', (...params) => this.emit('close', ...params))
-    ws.on('error', (...params) => this.emit('_error', ...params))
+    ws.on('message', data => this.emit('message', data as Buffer))
+    ws.on('close', (code, reason) => this.emit('close', code, reason))
+    ws.on('error', error => this.emit('_error', error))
 
     this.ws = ws
   }
@@ -130,8 +150,8 @@ export class LiveTCP extends Live {
 
     this.buffer = Buffer.alloc(0)
 
-    socket.on('ready', (...params) => this.emit('open', ...params))
-    socket.on('close', (...params) => this.emit('close', ...params))
+    socket.on('ready', () => this.emit('open'))
+    socket.on('close', () => this.emit('close'))
     socket.on('error', (...params) => this.emit('_error', ...params))
     socket.on('data', buffer => {
       this.buffer = Buffer.concat([this.buffer, buffer])
@@ -149,6 +169,8 @@ export class LiveTCP extends Live {
     }
   }
 }
+
+
 
 const keepLive = (Base: typeof LiveWS | typeof LiveTCP) => class extends EventEmitter {
   params: [number, any?]
@@ -224,6 +246,19 @@ const keepLive = (Base: typeof LiveWS | typeof LiveTCP) => class extends EventEm
   send(data: Buffer) {
     return this.connection.send(data)
   }
+}
+
+
+export interface KeepLiveWS {
+  on<E extends keyof EventMap>(eventName: E, listener: (...data: EventMap[E]) => void): any
+  once<E extends keyof EventMap>(eventName: E, listener: (...data: EventMap[E]) => void): any
+  emit<E extends keyof EventMap>(eventName: E, ...data: EventMap[E]): boolean
+}
+
+export interface KeepLiveTCP {
+  on<E extends keyof EventMap>(eventName: E, listener: (...data: EventMap[E]) => void): any
+  once<E extends keyof EventMap>(eventName: E, listener: (...data: EventMap[E]) => void): any
+  emit<E extends keyof EventMap>(eventName: E, ...data: EventMap[E]): boolean
 }
 
 export class KeepLiveWS extends keepLive(LiveWS) { }

@@ -49,7 +49,7 @@ export const decoder = async (buffer: Buffer) => {
 
   return packs.flatMap(pack => {
     if (pack.protocol === 2) {
-      return pack.data
+      return pack.data as typeof packs
     }
     return pack
   })
