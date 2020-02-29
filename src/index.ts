@@ -39,6 +39,7 @@ class Live extends NiceEventEmitter {
   roomid: number
   online: number
   live: boolean
+  closed: boolean
   timeout: ReturnType<typeof setTimeout>
 
   send: (data: Buffer) => void
@@ -53,10 +54,14 @@ class Live extends NiceEventEmitter {
     this.roomid = roomid
     this.online = 0
     this.live = false
+    this.closed = false
     this.timeout = setTimeout(() => { }, 0)
 
     this.send = send
-    this.close = close
+    this.close = () => {
+      this.closed = true
+      close()
+    }
 
     this.on('message', async buffer => {
       const packs = await decoder(buffer)

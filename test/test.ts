@@ -41,6 +41,13 @@ Object.entries({ LiveWS, LiveTCP, KeepLiveWS, KeepLiveTCP })
           live.close()
           return assert.strictEqual(online, live.online)
         })
+        it('closed', async function() {
+          const live = new Live(12235923)
+          assert.isFalse(live.closed)
+          await once(live, 'live')
+          live.close()
+          assert.isTrue(live.closed)
+        })
       })
       context('functions', function() {
         it('close', async function() {
