@@ -4,13 +4,22 @@ import { assert } from 'chai'
 
 import { LiveWS, LiveTCP, KeepLiveWS, KeepLiveTCP } from '..'
 
+const TIMEOUT = 1000 * 25
+const watch = (live: LiveWS | LiveTCP | KeepLiveWS | KeepLiveTCP) => setTimeout(() => {
+  if (!live.closed) {
+    live.close()
+  }
+}, TIMEOUT)
+
 Object.entries({ LiveWS, LiveTCP, KeepLiveWS, KeepLiveTCP })
   .forEach(([name, Live]) => {
     describe(name, function() {
+      this.retries(4)
       this.timeout(1000 * 25)
       context('Connect', function() {
         it('online', async function() {
           const live = new Live(12235923)
+          watch(live)
           const [online] = await once(live, 'heartbeat')
           live.close()
           return assert.isAbove(online, 0)
@@ -29,6 +38,7 @@ Object.entries({ LiveWS, LiveTCP, KeepLiveWS, KeepLiveTCP })
             .forEach(([name, roomid]) => {
               it(`roomid ${name}`, async function() {
                 const live = new Live(roomid)
+                watch(live)
                 await once(live, 'live')
                 live.close()
                 return assert.strictEqual(live.roomid, roomid)
@@ -37,12 +47,14 @@ Object.entries({ LiveWS, LiveTCP, KeepLiveWS, KeepLiveTCP })
         })
         it('online', async function() {
           const live = new Live(12235923)
+          watch(live)
           const [online] = await once(live, 'heartbeat')
           live.close()
           return assert.strictEqual(online, live.online)
         })
         it('closed', async function() {
           const live = new Live(12235923)
+          watch(live)
           assert.isFalse(live.closed)
           await once(live, 'live')
           live.close()
@@ -52,6 +64,7 @@ Object.entries({ LiveWS, LiveTCP, KeepLiveWS, KeepLiveTCP })
       context('functions', function() {
         it('close', async function() {
           const live = new Live(12235923)
+          watch(live)
           await once(live, 'heartbeat')
           const close = await new Promise(resolve => {
             live.on('close', () => resolve('closed'))
@@ -61,6 +74,7 @@ Object.entries({ LiveWS, LiveTCP, KeepLiveWS, KeepLiveTCP })
         })
         it('getOnline', async function() {
           const live = new Live(12235923)
+          watch(live)
           await once(live, 'live')
           const online = await live.getOnline()
           live.close()
@@ -69,6 +83,7 @@ Object.entries({ LiveWS, LiveTCP, KeepLiveWS, KeepLiveTCP })
         if (name.includes('Keep')) {
           it('close and reopen', async function() {
             const live = new (Live as typeof KeepLiveWS | typeof KeepLiveTCP)(12235923)
+            watch(live)
             await once(live, 'live')
             live.connection.close()
             await once(live, 'live')
@@ -77,6 +92,7 @@ Object.entries({ LiveWS, LiveTCP, KeepLiveWS, KeepLiveTCP })
         } else {
           it('close on error', async function() {
             const live = new Live(12235923)
+            watch(live)
             await once(live, 'heartbeat')
             const close = await new Promise(resolve => {
               live.on('close', () => resolve('closed'))
@@ -90,6 +106,7 @@ Object.entries({ LiveWS, LiveTCP, KeepLiveWS, KeepLiveTCP })
       context('options', function() {
         it('protover: 1', async function() {
           const live = new Live(12235923, { protover: 1 })
+          watch(live)
           const [online] = await once(live, 'heartbeat')
           live.close()
           return assert.isAbove(online, 0)
@@ -97,6 +114,7 @@ Object.entries({ LiveWS, LiveTCP, KeepLiveWS, KeepLiveTCP })
         if (name.includes('WS')) {
           it('address', async function() {
             const live = new Live(12235923, { address: 'wss://broadcastlv.chat.bilibili.com:2245/sub' })
+            watch(live)
             const [online] = await once(live, 'heartbeat')
             live.close()
             return assert.isAbove(online, 0)
@@ -104,6 +122,7 @@ Object.entries({ LiveWS, LiveTCP, KeepLiveWS, KeepLiveTCP })
         } else if (name.includes('TCP')) {
           it('host, port', async function() {
             const live = new Live(12235923, { host: 'broadcastlv.chat.bilibili.com', port: 2243 })
+            watch(live)
             const [online] = await once(live, 'heartbeat')
             live.close()
             return assert.isAbove(online, 0)
