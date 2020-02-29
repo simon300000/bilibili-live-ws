@@ -5,7 +5,7 @@ import WebSocket from 'ws'
 
 import { encoder, decoder } from './buffer'
 
-const relayEvent = Symbol('relay')
+export const relayEvent = Symbol('relay')
 
 class NiceEventEmitter extends EventEmitter {
   emit(eventName: string | symbol, ...params: any[]) {
