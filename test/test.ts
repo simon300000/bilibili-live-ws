@@ -81,6 +81,19 @@ Object.entries({ LiveWS, LiveTCP, KeepLiveWS, KeepLiveTCP })
           return assert.isAbove(online, 0)
         })
         if (name.includes('Keep')) {
+          it('no error relay', async function() {
+            const live = new (Live as typeof KeepLiveWS | typeof KeepLiveTCP)(12235923)
+            watch(live)
+            await once(live, 'live')
+            await new Promise((resolve, reject) => {
+              live.once('error', reject)
+              live.connection.emit('error', new Error('This shold not be caught'))
+              setTimeout(resolve, 1000);
+            })
+            live.close()
+          })
+        }
+        if (name.includes('Keep')) {
           it('close and reopen', async function() {
             const live = new (Live as typeof KeepLiveWS | typeof KeepLiveTCP)(12235923)
             watch(live)

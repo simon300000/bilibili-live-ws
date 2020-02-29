@@ -205,7 +205,11 @@ const keepLive = (Base: typeof LiveWS | typeof LiveTCP) => class extends EventEm
       connection.emit('timeout')
     }, this.timeout)
 
-    connection.on(relayEvent, (eventName: string, ...params: any[]) => this.emit(eventName, ...params))
+    connection.on(relayEvent, (eventName: string, ...params: any[]) => {
+      if (eventName !== 'error') {
+        this.emit(eventName, ...params)
+      }
+    })
 
     connection.on('error', (e: any) => this.emit('e', e))
     connection.on('close', () => {
