@@ -45,7 +45,7 @@ class Live extends NiceEventEmitter {
   send: (data: Buffer) => void
   close: () => void
 
-  constructor(roomid: number, { send, close, protover }: { send: (data: Buffer) => void, close: () => void, protover: 1 | 2 }) {
+  constructor(roomid: number, { send, close, protover, key }: { send: (data: Buffer) => void, close: () => void, protover: 1 | 2, key?: string }) {
     if (typeof roomid !== 'number' || Number.isNaN(roomid)) {
       throw new Error(`roomid ${roomid} must be Number not NaN`)
     }
@@ -93,7 +93,11 @@ class Live extends NiceEventEmitter {
     })
 
     this.on('open', () => {
-      const buf = encoder('join', { uid: 0, roomid, protover, platform: 'web', clientver: '1.8.5', type: 2 })
+      const hi: { uid: number, roomid: number, protover: number, platform: string, clientver: string, type: number, key?: string } = { uid: 0, roomid, protover, platform: 'web', clientver: '1.10.6', type: 2 }
+      if (key) {
+        hi.key = key
+      }
+      const buf = encoder('join', hi)
       this.send(buf)
     })
 
@@ -120,7 +124,7 @@ class Live extends NiceEventEmitter {
 export class LiveWS extends Live {
   ws: WebSocket
 
-  constructor(roomid: number, { address = 'wss://broadcastlv.chat.bilibili.com/sub', protover = 2 }: { address?: string, protover?: 1 | 2 } = {}) {
+  constructor(roomid: number, { address = 'wss://broadcastlv.chat.bilibili.com/sub', protover = 2, key }: { address?: string, protover?: 1 | 2, key?: string } = {}) {
     const ws = new WebSocket(address)
     const send = (data: Buffer) => {
       if (ws.readyState === 1) {
@@ -129,7 +133,7 @@ export class LiveWS extends Live {
     }
     const close = () => this.ws.close()
 
-    super(roomid, { send, close, protover })
+    super(roomid, { send, close, protover, key })
 
     ws.on('open', (...params) => this.emit('open', ...params))
     ws.on('message', data => this.emit('message', data as Buffer))
