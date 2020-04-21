@@ -148,14 +148,14 @@ export class LiveTCP extends Live {
   socket: Socket
   buffer: Buffer
 
-  constructor(roomid: number, { host = 'broadcastlv.chat.bilibili.com', port = 2243, protover = 2 }: { host?: string, port?: number, protover?: 1 | 2 } = {}) {
+  constructor(roomid: number, { host = 'broadcastlv.chat.bilibili.com', port = 2243, protover = 2, key }: { host?: string, port?: number, protover?: 1 | 2, key?: string } = {}) {
     const socket = net.connect(port, host)
     const send = (data: Buffer) => {
       socket.write(data)
     }
     const close = () => this.socket.end()
 
-    super(roomid, { send, close, protover })
+    super(roomid, { send, close, protover, key })
 
     this.buffer = Buffer.alloc(0)
 

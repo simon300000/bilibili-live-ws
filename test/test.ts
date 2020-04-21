@@ -2,6 +2,8 @@ import { once } from 'events'
 
 import { assert } from 'chai'
 
+import got from 'got'
+
 import { LiveWS, LiveTCP, KeepLiveWS, KeepLiveTCP } from '..'
 
 const TIMEOUT = 1000 * 25
@@ -143,6 +145,15 @@ Object.entries({ LiveWS, LiveTCP, KeepLiveWS, KeepLiveTCP })
         } else {
           throw new Error('no options test')
         }
+        it('key: token', async function() {
+          const { data: { token: key, host_server_list: [{ host }] } } = await got('https://api.live.bilibili.com/room/v1/Danmu/getConf').json()
+          const address = `wss://${host}/sub`
+          const live = new Live(12235923, { key, host, address })
+          watch(live)
+          const [online] = await once(live, 'heartbeat')
+          live.close()
+          return assert.isAbove(online, 0)
+        })
       })
     })
   })
