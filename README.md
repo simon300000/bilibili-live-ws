@@ -2,6 +2,8 @@
 
 Bilibili 直播 WebSocket/TCP API
 
+LiveWS/KeepLiveWS 支持浏览器 *(实验性)*
+
 ## API
 
 ```javascript

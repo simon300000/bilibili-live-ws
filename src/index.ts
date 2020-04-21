@@ -1,12 +1,42 @@
 import { EventEmitter } from 'events'
 import net, { Socket } from 'net'
 
-import WebSocket from 'ws'
+import BrowserWebSocket from 'isomorphic-ws'
+import NodeWebSocket from 'ws'
 
 import { encoder, decoder } from './buffer'
 import { Agent } from 'http'
 
 export const relayEvent = Symbol('relay')
+export const isNode = BrowserWebSocket === NodeWebSocket
+
+const WebSocket = isNode ? NodeWebSocket : class extends EventEmitter {
+  ws: BrowserWebSocket
+
+  constructor(address: string, ...args: any[]) {
+    super()
+
+    const ws = new BrowserWebSocket(address)
+    this.ws = ws
+
+    ws.onopen = () => this.emit('open')
+    ws.onmessage = async ({ data }) => this.emit('message', Buffer.from(await new Response(data as unknown as InstanceType<typeof Blob>).arrayBuffer()))
+    ws.onerror = () => this.emit('error')
+    ws.onclose = () => this.emit('close')
+  }
+
+  get readyState() {
+    return this.ws.readyState
+  }
+
+  send(data: Buffer) {
+    this.ws.send(data)
+  }
+
+  close(code?: number, data?: string) {
+    this.ws.close(code, data)
+  }
+}
 
 class NiceEventEmitter extends EventEmitter {
   emit(eventName: string | symbol, ...params: any[]) {
@@ -123,7 +153,7 @@ class Live extends NiceEventEmitter {
 }
 
 export class LiveWS extends Live {
-  ws: WebSocket
+  ws: InstanceType<typeof WebSocket>
 
   constructor(roomid: number, { address = 'wss://broadcastlv.chat.bilibili.com/sub', protover = 2, key, agent }: { address?: string, protover?: 1 | 2, key?: string, agent?: Agent } = {}) {
     const ws = new WebSocket(address, { agent })

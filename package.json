@@ -1,6 +1,6 @@
 {
   "name": "bilibili-live-ws",
-  "version": "4.1.0",
+  "version": "4.2.0",
   "description": "Bilibili Live WebSocket/TCP API",
   "main": "index.js",
   "scripts": {
@@ -29,6 +29,7 @@
   },
   "homepage": "https://github.com/simon300000/bilibili-live-ws#readme",
   "dependencies": {
+    "isomorphic-ws": "^4.0.1",
     "ws": "^7.2.0"
   },
   "devDependencies": {
