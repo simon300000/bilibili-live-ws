@@ -4,6 +4,7 @@ import net, { Socket } from 'net'
 import WebSocket from 'ws'
 
 import { encoder, decoder } from './buffer'
+import { Agent } from 'http'
 
 export const relayEvent = Symbol('relay')
 
@@ -124,8 +125,8 @@ class Live extends NiceEventEmitter {
 export class LiveWS extends Live {
   ws: WebSocket
 
-  constructor(roomid: number, { address = 'wss://broadcastlv.chat.bilibili.com/sub', protover = 2, key }: { address?: string, protover?: 1 | 2, key?: string } = {}) {
-    const ws = new WebSocket(address)
+  constructor(roomid: number, { address = 'wss://broadcastlv.chat.bilibili.com/sub', protover = 2, key, agent }: { address?: string, protover?: 1 | 2, key?: string, agent?: Agent } = {}) {
+    const ws = new WebSocket(address, { agent })
     const send = (data: Buffer) => {
       if (ws.readyState === 1) {
         ws.send(data)
