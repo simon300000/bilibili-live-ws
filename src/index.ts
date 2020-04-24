@@ -46,26 +46,6 @@ class NiceEventEmitter extends EventEmitter {
   }
 }
 
-type EventMap = {
-  [relayEvent]: any[]
-  close: [number?, string?]
-  open: []
-  _error: [Error]
-  error: [Error]
-  live: []
-  msg: [any]
-  heartbeat: [number]
-  timeout: []
-  DANMU_MSG: [object]
-  message: [Buffer]
-}
-
-interface Live {
-  on<E extends keyof EventMap>(eventName: E, listener: (...data: EventMap[E]) => void): any
-  once<E extends keyof EventMap>(eventName: E, listener: (...data: EventMap[E]) => void): any
-  emit<E extends keyof EventMap>(eventName: E, ...data: EventMap[E]): boolean
-}
-
 class Live extends NiceEventEmitter {
   roomid: number
   online: number
@@ -292,18 +272,6 @@ const keepLive = (Base: typeof LiveWS | typeof LiveTCP) => class extends EventEm
   }
 }
 
-
-export interface KeepLiveWS {
-  on<E extends keyof EventMap>(eventName: E, listener: (...data: EventMap[E]) => void): any
-  once<E extends keyof EventMap>(eventName: E, listener: (...data: EventMap[E]) => void): any
-  emit<E extends keyof EventMap>(eventName: E, ...data: EventMap[E]): boolean
-}
-
-export interface KeepLiveTCP {
-  on<E extends keyof EventMap>(eventName: E, listener: (...data: EventMap[E]) => void): any
-  once<E extends keyof EventMap>(eventName: E, listener: (...data: EventMap[E]) => void): any
-  emit<E extends keyof EventMap>(eventName: E, ...data: EventMap[E]): boolean
-}
 
 export class KeepLiveWS extends keepLive(LiveWS) { }
 export class KeepLiveTCP extends keepLive(LiveTCP) { }
