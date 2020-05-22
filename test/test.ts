@@ -2,9 +2,7 @@ import { once } from 'events'
 
 import { assert } from 'chai'
 
-import got from 'got'
-
-import { LiveWS, LiveTCP, KeepLiveWS, KeepLiveTCP } from '..'
+import { LiveWS, LiveTCP, KeepLiveWS, KeepLiveTCP, getConf } from '..'
 
 const TIMEOUT = 1000 * 25
 const watch = (live: LiveWS | LiveTCP | KeepLiveWS | KeepLiveTCP) => setTimeout(() => {
@@ -27,7 +25,7 @@ Object.entries({ LiveWS, LiveTCP, KeepLiveWS, KeepLiveTCP })
           return assert.isAbove(online, 0)
         })
         it('roomid must be number', function() {
-          //@ts-ignore
+          // @ts-ignore
           return assert.throw(() => new Live('12235923'))
         })
         it('roomid can not be NaN', function() {
@@ -90,7 +88,7 @@ Object.entries({ LiveWS, LiveTCP, KeepLiveWS, KeepLiveTCP })
             await new Promise((resolve, reject) => {
               live.once('error', reject)
               live.connection.emit('error', new Error('This shold not be caught'))
-              setTimeout(resolve, 1000);
+              setTimeout(resolve, 1000)
             })
             live.close()
           })
@@ -146,8 +144,7 @@ Object.entries({ LiveWS, LiveTCP, KeepLiveWS, KeepLiveTCP })
           throw new Error('no options test')
         }
         it('key: token', async function() {
-          const { data: { token: key, host_server_list: [{ host }] } } = await got('https://api.live.bilibili.com/room/v1/Danmu/getConf').json()
-          const address = `wss://${host}/sub`
+          const { key, host, address } = await getConf(12235923)
           const live = new Live(12235923, { key, host, address })
           watch(live)
           const [online] = await once(live, 'heartbeat')
