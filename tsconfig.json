@@ -13,6 +13,7 @@
     "src"
   ],
   "files": [
-    "index.ts"
+    "index.ts",
+    "extra.ts"
   ]
 }
