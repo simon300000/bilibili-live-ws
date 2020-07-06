@@ -1,22 +1,21 @@
 import { EventEmitter } from 'events'
 import net, { Socket } from 'net'
 
-import BrowserWebSocket from 'isomorphic-ws'
-import NodeWebSocket from 'ws'
+import IsomorphicWebSocket from 'isomorphic-ws'
 
 import { encoder, decoder } from './buffer'
 import { Agent } from 'http'
 
 export const relayEvent = Symbol('relay')
-export const isNode = BrowserWebSocket === NodeWebSocket
+export const isNode = !!IsomorphicWebSocket.Server
 
-const WebSocket = isNode ? NodeWebSocket : class extends EventEmitter {
-  ws: BrowserWebSocket
+const WebSocket = isNode ? IsomorphicWebSocket : class extends EventEmitter {
+  ws: IsomorphicWebSocket
 
   constructor(address: string, ...args: any[]) {
     super()
 
-    const ws = new BrowserWebSocket(address)
+    const ws = new IsomorphicWebSocket(address)
     this.ws = ws
 
     ws.onopen = () => this.emit('open')
