@@ -103,7 +103,7 @@ class Live extends NiceEventEmitter {
     })
 
     this.on('open', () => {
-      const hi: { uid: number, roomid: number, protover: number, platform: string, clientver: string, type: number, key?: string } = { uid: 0, roomid, protover, platform: 'web', clientver: '1.10.6', type: 2 }
+      const hi: { uid: number, roomid: number, protover: number, platform: string, clientver: string, type: number, key?: string } = { uid: 0, roomid, protover, platform: 'web', clientver: '2.0.11', type: 2 }
       if (key) {
         hi.key = key
       }
