@@ -2,8 +2,7 @@ import { once } from 'events'
 
 import { assert } from 'chai'
 
-import { LiveWS, LiveTCP, KeepLiveWS, KeepLiveTCP } from '..'
-import { getConf } from '../extra'
+import { LiveWS, LiveTCP, KeepLiveWS, KeepLiveTCP, getConf } from '../index.js'
 
 const TIMEOUT = 1000 * 25
 const watch = (live: LiveWS | LiveTCP | KeepLiveWS | KeepLiveTCP) => setTimeout(() => {
@@ -83,7 +82,7 @@ Object.entries({ LiveWS, LiveTCP, KeepLiveWS, KeepLiveTCP })
         })
         if (name.includes('Keep')) {
           it('no error relay', async function() {
-            const live = new (Live as typeof KeepLiveWS | typeof KeepLiveTCP)(12235923)
+            const live = new Live(12235923) as KeepLiveWS | KeepLiveTCP
             watch(live)
             await once(live, 'live')
             await new Promise((resolve, reject) => {
@@ -96,7 +95,7 @@ Object.entries({ LiveWS, LiveTCP, KeepLiveWS, KeepLiveTCP })
         }
         if (name.includes('Keep')) {
           it('close and reopen', async function() {
-            const live = new (Live as typeof KeepLiveWS | typeof KeepLiveTCP)(12235923)
+            const live = new Live(12235923) as KeepLiveWS | KeepLiveTCP
             watch(live)
             await once(live, 'live')
             live.connection.close()
@@ -127,7 +126,8 @@ Object.entries({ LiveWS, LiveTCP, KeepLiveWS, KeepLiveTCP })
         })
         if (name.includes('WS')) {
           it('address', async function() {
-            const live = new Live(12235923, { address: 'wss://broadcastlv.chat.bilibili.com:2245/sub' })
+            const L = Live as typeof LiveWS || KeepLiveWS
+            const live = new L(12235923, { address: 'wss://broadcastlv.chat.bilibili.com:2245/sub' })
             watch(live)
             const [online] = await once(live, 'heartbeat')
             live.close()
@@ -146,7 +146,7 @@ Object.entries({ LiveWS, LiveTCP, KeepLiveWS, KeepLiveTCP })
         }
         it('key: token', async function() {
           const { key, host, address } = await getConf(12235923)
-          const live = new Live(12235923, { key, host, address })
+          const live = new Live(12235923, { key, host, address } as any)
           watch(live)
           const [online] = await once(live, 'heartbeat')
           live.close()

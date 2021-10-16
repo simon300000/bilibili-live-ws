@@ -1,2 +1,2 @@
-import * as bilibiliLiveWS from './src'
-export = bilibiliLiveWS
+export * from './src/index.js'
+export { getConf } from './src/extra.js'

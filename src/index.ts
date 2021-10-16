@@ -3,23 +3,23 @@ import net, { Socket } from 'net'
 
 import IsomorphicWebSocket from 'isomorphic-ws'
 
-import { encoder, decoder } from './buffer'
+import { encoder, decoder } from './buffer.js'
 import { Agent } from 'http'
 
 export const relayEvent = Symbol('relay')
 export const isNode = !!IsomorphicWebSocket.Server
 
-const WebSocket = isNode ? IsomorphicWebSocket : class extends EventEmitter {
+class WebSocket extends EventEmitter {
   ws: IsomorphicWebSocket
 
   constructor(address: string, ...args: any[]) {
     super()
 
-    const ws = new IsomorphicWebSocket(address)
+    const ws = new IsomorphicWebSocket(address, ...args)
     this.ws = ws
 
     ws.onopen = () => this.emit('open')
-    ws.onmessage = async ({ data }) => this.emit('message', Buffer.from(await new Response(data as unknown as InstanceType<typeof Blob>).arrayBuffer()))
+    ws.onmessage = isNode ? ({ data }) => this.emit('message', data) : async ({ data }) => this.emit('message', Buffer.from(await new Response(data as unknown as InstanceType<typeof Blob>).arrayBuffer()))
     ws.onerror = () => this.emit('error')
     ws.onclose = () => this.emit('close')
   }
@@ -196,26 +196,28 @@ export class LiveTCP extends Live {
   }
 }
 
-const keepLive = (Base: typeof LiveWS | typeof LiveTCP) => class extends EventEmitter {
+class KeepLive<Base extends typeof LiveWS | typeof LiveTCP> extends EventEmitter {
   params: [number, any?]
   closed: boolean
   interval: number
   timeout: number
-  connection: InstanceType<typeof Base>
+  connection: InstanceType<typeof LiveWS | typeof LiveTCP>
+  Base: Base
 
-  constructor(...params: ConstructorParameters<typeof Base>) {
+  constructor(Base: Base, ...params: ConstructorParameters<Base>) {
     super()
     this.params = params
     this.closed = false
     this.interval = 100
     this.timeout = 45 * 1000
     this.connection = new Base(...this.params)
+    this.Base = Base
     this.connect(false)
   }
 
   connect(reconnect = true) {
     if (reconnect) {
-      this.connection = new Base(...this.params)
+      this.connection = new this.Base(...this.params)
     }
     const connection = this.connection
 
@@ -276,5 +278,15 @@ const keepLive = (Base: typeof LiveWS | typeof LiveTCP) => class extends EventEm
   }
 }
 
-export class KeepLiveWS extends keepLive(LiveWS) { }
-export class KeepLiveTCP extends keepLive(LiveTCP) { }
+export class KeepLiveWS extends KeepLive<typeof LiveWS> {
+  constructor(...params: ConstructorParameters<typeof LiveWS>) {
+    super(LiveWS, ...params)
+  }
+}
+
+export class KeepLiveTCP extends KeepLive<typeof LiveTCP> {
+  constructor(...params: ConstructorParameters<typeof LiveTCP>) {
+    super(LiveTCP, ...params)
+  }
+}
+
