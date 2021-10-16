@@ -157,6 +157,7 @@ export class LiveWS extends Live {
 export class LiveTCP extends Live {
   socket: Socket
   buffer: Buffer
+  i: number
 
   constructor(roomid: number, { host = 'broadcastlv.chat.bilibili.com', port = 2243, protover = 2, key }: { host?: string, port?: number, protover?: 1 | 2, key?: string } = {}) {
     const socket = net.connect(port, host)
@@ -167,6 +168,7 @@ export class LiveTCP extends Live {
 
     super(roomid, { send, close, protover, key })
 
+    this.i = 0
     this.buffer = Buffer.alloc(0)
 
     socket.on('ready', () => this.emit('open'))
@@ -184,6 +186,11 @@ export class LiveTCP extends Live {
       const size = this.buffer.readInt32BE(0)
       const pack = this.buffer.slice(0, size)
       this.buffer = this.buffer.slice(size)
+      this.i++
+      if (this.i > 5) {
+        this.i = 0
+        this.buffer = Buffer.from(this.buffer)
+      }
       this.emit('message', pack)
     }
   }
