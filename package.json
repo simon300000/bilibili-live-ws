@@ -31,7 +31,7 @@
   "homepage": "https://github.com/simon300000/bilibili-live-ws#readme",
   "dependencies": {
     "isomorphic-ws": "^4.0.1",
-    "ws": "^7.2.0"
+    "ws": "^8.2.3"
   },
   "optionalDependencies": {
     "got": "^11.1.4"
