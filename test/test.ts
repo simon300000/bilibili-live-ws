@@ -2,7 +2,7 @@ import { once } from 'events'
 
 import { assert } from 'chai'
 
-import { LiveWS, LiveTCP, KeepLiveWS, KeepLiveTCP, getConf } from '..'
+import { LiveWS, LiveTCP, KeepLiveWS, KeepLiveTCP, getConf, getRoomid } from '..'
 
 const TIMEOUT = 1000 * 25
 const watch = (live: LiveWS | LiveTCP | KeepLiveWS | KeepLiveTCP) => setTimeout(() => {
@@ -10,6 +10,13 @@ const watch = (live: LiveWS | LiveTCP | KeepLiveWS | KeepLiveTCP) => setTimeout(
     live.close()
   }
 }, TIMEOUT)
+
+describe('extra', function() {
+  it('getRoomid', async () => {
+    const roomid = await getRoomid(255)
+    assert.strictEqual(roomid, 48743)
+  })
+})
 
 Object.entries({ LiveWS, LiveTCP, KeepLiveWS, KeepLiveTCP })
   .forEach(([name, Live]) => {

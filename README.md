@@ -198,7 +198,7 @@ WebSocket/TCP收到的Raw Buffer（不推荐直接使用）
 
 使用 WebSocket 或者 TCP 发送信息
 
-## getConf(roomid)
+### getConf(roomid)
 
 选一个cdn，Resolve host, address 和 key, 可以直接放进(Keep)LiveWS/TCP设置
 
@@ -214,6 +214,19 @@ Promise<{
     host: string;
     address: string;
 }>
+```
+
+### getRoomid(short)
+
+通过短房间号获取长房间号
+
+(需要安装 got)
+
+```typescript
+const { getRoomid } = require('bilibili-live-ws')
+
+getRoomid(255)
+// Return Promise<number>: 48743
 ```
 
 <hr>

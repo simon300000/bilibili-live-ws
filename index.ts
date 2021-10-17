@@ -1,2 +1,2 @@
 export * from './src'
-export { getConf } from './src/extra'
+export { getConf, getRoomid } from './src/extra'
