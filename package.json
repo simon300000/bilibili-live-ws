@@ -40,7 +40,7 @@
     "@types/chai": "^4.2.8",
     "@types/mocha": "^7.0.1",
     "@types/node": "^16.11.0",
-    "@types/ws": "^7.2.1",
+    "@types/ws": "^8.2.0",
     "chai": "^4.2.0",
     "coveralls": "^3.0.6",
     "got": "^11.1.4",
