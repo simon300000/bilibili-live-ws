@@ -217,6 +217,7 @@ class KeepLive<Base extends typeof LiveWS | typeof LiveTCP> extends EventEmitter
 
   connect(reconnect = true) {
     if (reconnect) {
+      this.connection.close()
       this.connection = new this.Base(...this.params)
     }
     const connection = this.connection
