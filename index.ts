@@ -1,2 +1,2 @@
-export * from './src/index.js'
-export { getConf } from './src/extra.js'
+export * from './src'
+export { getConf } from './src/extra'

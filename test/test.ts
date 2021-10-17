@@ -2,7 +2,7 @@ import { once } from 'events'
 
 import { assert } from 'chai'
 
-import { LiveWS, LiveTCP, KeepLiveWS, KeepLiveTCP, getConf } from '../index.js'
+import { LiveWS, LiveTCP, KeepLiveWS, KeepLiveTCP, getConf } from '..'
 
 const TIMEOUT = 1000 * 25
 const watch = (live: LiveWS | LiveTCP | KeepLiveWS | KeepLiveTCP) => setTimeout(() => {

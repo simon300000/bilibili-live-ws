@@ -3,7 +3,7 @@ import net, { Socket } from 'net'
 
 import IsomorphicWebSocket from 'isomorphic-ws'
 
-import { encoder, decoder } from './buffer.js'
+import { encoder, decoder } from './buffer'
 import { Agent } from 'http'
 
 export const relayEvent = Symbol('relay')

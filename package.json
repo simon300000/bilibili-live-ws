@@ -5,7 +5,7 @@
   "type": "commonjs",
   "main": "index.js",
   "scripts": {
-    "test": "npm run clear; npm run tsc && npm run unit",
+    "test": "npm run clear; npm run unit",
     "unit": "nyc mocha --reporter=landing -r ts-node/register test/test.ts",
     "clear": "rm index.js index.d.ts src/*.js src/*.d.ts test/*.js test/*.d.ts;exit 0",
     "tsc": "tsc -b",
