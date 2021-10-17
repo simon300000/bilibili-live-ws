@@ -1,8 +1,6 @@
-import { inflate, brotliDecompress } from 'zlib'
-import { promisify } from 'util'
-
-const inflateAsync = promisify<Parameters<typeof inflate>[0], Parameters<Parameters<typeof inflate>[2]>[1]>(inflate)
-const brotliDecompressAsync = promisify<Parameters<typeof brotliDecompress>[0], Parameters<Parameters<typeof brotliDecompress>[1]>[1]>(brotliDecompress)
+import { Buffer } from 'buffer'
+export { Buffer }
+export type Inflates = { inflateAsync: (b: Buffer) => Buffer | Promise<Buffer>, brotliDecompressAsync: (b: Buffer) => Buffer | Promise<Buffer> }
 
 const blank = Buffer.alloc(16)
 
@@ -18,45 +16,49 @@ const cutBuffer = (buffer: Buffer) => {
   return bufferPacks
 }
 
-export const decoder = async (buffer: Buffer) => {
-  const packs = await Promise.all(cutBuffer(buffer)
-    .map(async buf => {
-      const body = buf.slice(16)
-      const protocol = buf.readInt16BE(6)
-      const operation = buf.readInt32BE(8)
+export const makeDecoder = ({ inflateAsync, brotliDecompressAsync }: Inflates) => {
+  const decoder = async (buffer: Buffer) => {
+    const packs = await Promise.all(cutBuffer(buffer)
+      .map(async buf => {
+        const body = buf.slice(16)
+        const protocol = buf.readInt16BE(6)
+        const operation = buf.readInt32BE(8)
 
-      let type = 'unknow'
-      if (operation === 3) {
-        type = 'heartbeat'
-      } else if (operation === 5) {
-        type = 'message'
-      } else if (operation === 8) {
-        type = 'welcome'
-      }
+        let type = 'unknow'
+        if (operation === 3) {
+          type = 'heartbeat'
+        } else if (operation === 5) {
+          type = 'message'
+        } else if (operation === 8) {
+          type = 'welcome'
+        }
 
-      let data: any
-      if (protocol === 0) {
-        data = JSON.parse(String(body))
-      }
-      if (protocol === 1 && body.length === 4) {
-        data = body.readUIntBE(0, 4)
-      }
-      if (protocol === 2) {
-        data = await decoder(await inflateAsync(body))
-      }
-      if (protocol === 3) {
-        data = await decoder(await brotliDecompressAsync(body))
-      }
+        let data: any
+        if (protocol === 0) {
+          data = JSON.parse(String(body))
+        }
+        if (protocol === 1 && body.length === 4) {
+          data = body.readUIntBE(0, 4)
+        }
+        if (protocol === 2) {
+          data = await decoder(await inflateAsync(body))
+        }
+        if (protocol === 3) {
+          data = await decoder(await brotliDecompressAsync(body))
+        }
 
-      return { buf, type, protocol, data }
-    }))
+        return { buf, type, protocol, data }
+      }))
 
-  return packs.flatMap(pack => {
-    if (pack.protocol === 2 || pack.protocol === 3) {
-      return pack.data as typeof packs
-    }
-    return pack
-  })
+    return packs.flatMap(pack => {
+      if (pack.protocol === 2 || pack.protocol === 3) {
+        return pack.data as typeof packs
+      }
+      return pack
+    })
+  }
+
+  return decoder
 }
 
 export const encoder = (type: string, body: any = '') => {

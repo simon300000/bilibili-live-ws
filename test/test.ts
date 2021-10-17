@@ -3,6 +3,7 @@ import { once } from 'events'
 import { assert } from 'chai'
 
 import { LiveWS, LiveTCP, KeepLiveWS, KeepLiveTCP, getConf, getRoomid } from '..'
+import { LiveWS as LiveWSBrowser, KeepLiveWS as KeepLiveWSBrowser } from '../browser'
 
 const TIMEOUT = 1000 * 25
 const watch = (live: LiveWS | LiveTCP | KeepLiveWS | KeepLiveTCP) => setTimeout(() => {
@@ -18,7 +19,7 @@ describe('extra', function() {
   })
 })
 
-Object.entries({ LiveWS, LiveTCP, KeepLiveWS, KeepLiveTCP })
+Object.entries({ LiveWS, LiveTCP, KeepLiveWS, KeepLiveTCP, LiveWSBrowser, KeepLiveWSBrowser })
   .forEach(([name, Live]) => {
     describe(name, function() {
       this.retries(4)
