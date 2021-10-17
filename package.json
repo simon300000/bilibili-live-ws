@@ -1,6 +1,6 @@
 {
   "name": "bilibili-live-ws",
-  "version": "6.0.0",
+  "version": "6.0.1",
   "description": "Bilibili Live WebSocket/TCP API",
   "type": "commonjs",
   "main": "index.js",
@@ -8,8 +8,9 @@
   "scripts": {
     "test": "npm run clear; npm run unit",
     "unit": "nyc mocha --reporter=landing -r ts-node/register test/test.ts",
-    "clear": "rm index.js index.d.ts src/*.js src/*.d.ts test/*.js test/*.d.ts;exit 0",
+    "clear": "rm index.js index.d.ts browser.js browser.d.ts src/*.js src/*.d.ts;exit 0",
     "tsc": "tsc -b",
+    "build": "npm run clear && npm run tsc",
     "coverage": "mkdir coverage; nyc report --reporter=text-lcov >> ./coverage/lcov.info"
   },
   "repository": {
