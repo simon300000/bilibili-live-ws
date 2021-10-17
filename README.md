@@ -65,9 +65,13 @@ live.on('live', () => {
 
   默认 `2243`
   
-- `protover` 可选, 见 #17 
+- `protover` 可选 (1, 2, 3)
 
   默认 `2`
+  
+  * 1 (见 #17)
+  * 2 (zlib.inflate)
+  * 3 (brotliDecompress)
   
 - `key` 可选, WS握手的Token
 

@@ -124,6 +124,13 @@ Object.entries({ LiveWS, LiveTCP, KeepLiveWS, KeepLiveTCP })
           live.close()
           return assert.isAbove(online, 0)
         })
+        it('protover: 3', async function() {
+          const live = new Live(12235923, { protover: 3 })
+          watch(live)
+          const [online] = await once(live, 'heartbeat')
+          live.close()
+          return assert.isAbove(online, 0)
+        })
         if (name.includes('WS')) {
           it('address', async function() {
             const L = Live as typeof LiveWS || KeepLiveWS

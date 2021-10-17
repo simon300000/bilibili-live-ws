@@ -1,7 +1,8 @@
-import { inflate } from 'zlib'
+import { inflate, brotliDecompress } from 'zlib'
 import { promisify } from 'util'
 
 const inflateAsync = promisify<Parameters<typeof inflate>[0], Parameters<Parameters<typeof inflate>[2]>[1]>(inflate)
+const brotliDecompressAsync = promisify<Parameters<typeof brotliDecompress>[0], Parameters<Parameters<typeof brotliDecompress>[1]>[1]>(brotliDecompress)
 
 const blank = Buffer.alloc(16)
 
@@ -41,14 +42,17 @@ export const decoder = async (buffer: Buffer) => {
         data = body.readUIntBE(0, 4)
       }
       if (protocol === 2) {
-        data = await decoder((await inflateAsync(body)))
+        data = await decoder(await inflateAsync(body))
+      }
+      if (protocol === 3) {
+        data = await decoder(await brotliDecompressAsync(body))
       }
 
       return { buf, type, protocol, data }
     }))
 
   return packs.flatMap(pack => {
-    if (pack.protocol === 2) {
+    if (pack.protocol === 2 || pack.protocol === 3) {
       return pack.data as typeof packs
     }
     return pack

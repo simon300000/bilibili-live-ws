@@ -9,6 +9,10 @@ import { Agent } from 'http'
 export const relayEvent = Symbol('relay')
 export const isNode = !!IsomorphicWebSocket.Server
 
+export type LiveOptions = { protover?: 1 | 2 | 3, key?: string }
+export type WSOptions = LiveOptions & { address?: string, agent?: Agent }
+export type TCPOptions = LiveOptions & { host?: string, port?: number }
+
 class WebSocket extends EventEmitter {
   ws: IsomorphicWebSocket
 
@@ -55,7 +59,7 @@ class Live extends NiceEventEmitter {
   send: (data: Buffer) => void
   close: () => void
 
-  constructor(roomid: number, { send, close, protover, key }: { send: (data: Buffer) => void, close: () => void, protover: 1 | 2, key?: string }) {
+  constructor(roomid: number, { send, close, protover = 2, key }: { send: (data: Buffer) => void, close: () => void } & LiveOptions) {
     if (typeof roomid !== 'number' || Number.isNaN(roomid)) {
       throw new Error(`roomid ${roomid} must be Number not NaN`)
     }
@@ -75,8 +79,7 @@ class Live extends NiceEventEmitter {
 
     this.on('message', async buffer => {
       const packs = await decoder(buffer)
-      packs.forEach(pack => {
-        const { type, data } = pack
+      packs.forEach(({ type, data }) => {
         if (type === 'welcome') {
           this.live = true
           this.emit('live')
@@ -134,7 +137,7 @@ class Live extends NiceEventEmitter {
 export class LiveWS extends Live {
   ws: InstanceType<typeof WebSocket>
 
-  constructor(roomid: number, { address = 'wss://broadcastlv.chat.bilibili.com/sub', protover = 2, key, agent }: { address?: string, protover?: 1 | 2, key?: string, agent?: Agent } = {}) {
+  constructor(roomid: number, { address = 'wss://broadcastlv.chat.bilibili.com/sub', protover, key, agent }: WSOptions = {}) {
     const ws = new WebSocket(address, { agent })
     const send = (data: Buffer) => {
       if (ws.readyState === 1) {
@@ -159,7 +162,7 @@ export class LiveTCP extends Live {
   buffer: Buffer
   i: number
 
-  constructor(roomid: number, { host = 'broadcastlv.chat.bilibili.com', port = 2243, protover = 2, key }: { host?: string, port?: number, protover?: 1 | 2, key?: string } = {}) {
+  constructor(roomid: number, { host = 'broadcastlv.chat.bilibili.com', port = 2243, protover, key }: TCPOptions = {}) {
     const socket = net.connect(port, host)
     const send = (data: Buffer) => {
       socket.write(data)
