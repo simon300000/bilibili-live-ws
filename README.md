@@ -201,7 +201,7 @@ WebSocket/TCP收到的Raw Buffer（不推荐直接使用）
 (需要安装 got `npm i -S got`)
 
 ```typescript
-const { getConf } = require('bilibili-live-ws/extra')
+const { getConf } = require('bilibili-live-ws')
 
 getConf(roomid)
 // Return
