@@ -127,7 +127,7 @@ Object.entries({ LiveWS, LiveTCP, KeepLiveWS, KeepLiveTCP })
         if (name.includes('WS')) {
           it('address', async function() {
             const L = Live as typeof LiveWS || KeepLiveWS
-            const live = new L(12235923, { address: 'wss://broadcastlv.chat.bilibili.com:2245/sub' })
+            const live = new L(12235923, { address: 'wss://broadcastlv.chat.bilibili.com/sub' })
             watch(live)
             const [online] = await once(live, 'heartbeat')
             live.close()
