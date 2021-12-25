@@ -1,9 +1,9 @@
 import { Buffer } from 'buffer'
 
-import decompression from 'brotli/decompress'
+import { BrotliDecode } from './brotli'
 import { inflate } from 'pako'
 
 const inflateAsync = (d: Buffer) => Buffer.from(inflate(d))
-const brotliDecompressAsync = (d: Buffer) => Buffer.from(decompression(d))
+const brotliDecompressAsync = (d: Buffer) => Buffer.from(BrotliDecode(Int8Array.from(d)))
 
 export const inflates = { inflateAsync, brotliDecompressAsync }

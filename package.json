@@ -32,7 +32,6 @@
   },
   "homepage": "https://github.com/simon300000/bilibili-live-ws#readme",
   "dependencies": {
-    "brotli": "github:foliojs/brotli.js#919ce10e3ee8fa598d3b918b4d3bdd0dcda68b29",
     "isomorphic-ws": "^4.0.1",
     "ws": "^8.2.3"
   },
@@ -40,7 +39,6 @@
     "got": "^11.1.4"
   },
   "devDependencies": {
-    "@types/brotli": "^1.3.1",
     "@types/chai": "^4.2.8",
     "@types/mocha": "^9.0.0",
     "@types/node": "^16.11.0",
