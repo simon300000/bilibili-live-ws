@@ -4,6 +4,8 @@ Bilibili 直播 WebSocket/TCP API
 
 LiveWS/KeepLiveWS 支持浏览器 *(实验性)*
 
+注：如果在浏览器环境遇到问题，可以尝试手动指定引入 `bilibili-live-ws/browser`
+
 ## API
 
 ```javascript
