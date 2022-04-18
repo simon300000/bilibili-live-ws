@@ -4,6 +4,8 @@ Bilibili 直播 WebSocket/TCP API
 
 LiveWS/KeepLiveWS 支持浏览器 *(实验性)*
 
+应该支持 bilibili直播开放平台 <https://open-live.bilibili.com>
+
 注：如果在浏览器环境遇到问题，可以尝试手动指定引入 `bilibili-live-ws/browser`
 
 ## API
@@ -76,6 +78,8 @@ live.on('live', () => {
   * 3 (brotliDecompress)
   
 - `key` 可选, WS握手的Token
+
+- `authBody` 可选, 可以和 <https://open-live.bilibili.com/document/> 配合使用, 会覆盖掉 `protover` `roomid` `key`
 
 #### live.on('open')
 
