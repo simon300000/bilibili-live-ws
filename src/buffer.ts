@@ -1,10 +1,7 @@
 import 'array-flat-polyfill'
 
-import { Buffer } from 'buffer'
-export { Buffer }
-export type Inflates = { inflateAsync: (b: Buffer) => Buffer | Promise<Buffer>, brotliDecompressAsync: (b: Buffer) => Buffer | Promise<Buffer> }
-
-const blank = Buffer.alloc(16)
+export type { Buffer } from 'buffer'
+export type Inflates = { inflateAsync: (b: Buffer) => Buffer | Promise<Buffer>, brotliDecompressAsync: (b: Buffer) => Buffer | Promise<Buffer>, Buffer: typeof Buffer }
 
 // https://github.com/lovelyyoshino/Bilibili-Live-API/blob/master/API.WebSocket.md
 
@@ -63,7 +60,8 @@ export const makeDecoder = ({ inflateAsync, brotliDecompressAsync }: Inflates) =
   return decoder
 }
 
-export const encoder = (type: string, body: any = '') => {
+export const encoder = (type: string, { Buffer }: Inflates, body: any = '') => {
+  const blank = Buffer.alloc(16)
   if (typeof body !== 'string') {
     body = JSON.stringify(body)
   }

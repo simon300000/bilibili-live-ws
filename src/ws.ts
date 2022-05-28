@@ -2,7 +2,7 @@ import { EventEmitter } from 'events'
 import { Agent } from 'http'
 import IsomorphicWebSocket from 'isomorphic-ws'
 
-import { Inflates, Buffer } from './buffer'
+import { Inflates } from './buffer'
 import { LiveOptions, Live } from './common'
 
 export type WSOptions = LiveOptions & { address?: string, agent?: Agent }

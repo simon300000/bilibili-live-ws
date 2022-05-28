@@ -7,12 +7,12 @@ export { LiveOptions, relayEvent } from './common'
 
 export class LiveWS extends LiveWSBase {
   constructor(roomid: number, opts?: WSOptions) {
-    super(inflates, roomid, opts)
+    super(inflates as any, roomid, opts)
   }
 }
 
 export class KeepLiveWS extends KeepLive<typeof LiveWSBase> {
   constructor(roomid: number, opts?: WSOptions) {
-    super(LiveWSBase, inflates, roomid, opts)
+    super(LiveWSBase, inflates as any, roomid, opts)
   }
 }

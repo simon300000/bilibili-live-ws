@@ -51,7 +51,7 @@ export class Live extends NiceEventEmitter {
         if (type === 'welcome') {
           this.live = true
           this.emit('live')
-          this.send(encoder('heartbeat'))
+          this.send(encoder('heartbeat', inflates))
         }
         if (type === 'heartbeat') {
           this.online = data
@@ -81,7 +81,7 @@ export class Live extends NiceEventEmitter {
         if (key) {
           hi.key = key
         }
-        const buf = encoder('join', hi)
+        const buf = encoder('join', inflates, hi)
         this.send(buf)
       }
     })
@@ -97,7 +97,7 @@ export class Live extends NiceEventEmitter {
   }
 
   heartbeat() {
-    this.send(encoder('heartbeat'))
+    this.send(encoder('heartbeat', this.inflates))
   }
 
   getOnline() {
