@@ -37,7 +37,7 @@
     "ws": "^8.2.3"
   },
   "optionalDependencies": {
-    "got": "^11.1.4"
+    "got": "^12.5.3"
   },
   "devDependencies": {
     "@types/chai": "^4.2.8",
@@ -47,7 +47,7 @@
     "@types/ws": "^8.2.0",
     "chai": "^4.2.0",
     "coveralls": "^3.0.6",
-    "got": "^11.1.4",
+    "got": "^12.5.3",
     "mocha": "^9.1.3",
     "nyc": "^15.0.0",
     "ts-node": "^10.3.0",
