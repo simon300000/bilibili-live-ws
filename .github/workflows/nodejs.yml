@@ -13,9 +13,9 @@ jobs:
     runs-on: macOS-latest
 
     steps:
-    - uses: actions/checkout@master
+    - uses: actions/checkout@3
     - name: Use Node.js 16
-      uses: actions/setup-node@master
+      uses: actions/setup-node@3
       with:
         node-version: '16'
     - name: npm install and test
