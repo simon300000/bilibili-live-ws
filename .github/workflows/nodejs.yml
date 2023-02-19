@@ -13,7 +13,7 @@ jobs:
     runs-on: macOS-latest
 
     steps:
-    - uses: actions/checkout@3
+    - uses: actions/checkout@2
     - name: Use Node.js 16
       uses: actions/setup-node@3
       with:
