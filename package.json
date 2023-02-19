@@ -42,7 +42,7 @@
     "@types/chai": "^4.2.8",
     "@types/mocha": "^10.0.1",
     "@types/node": "^18.14.0",
-    "@types/pako": "^1.0.2",
+    "@types/pako": "^2.0.0",
     "@types/ws": "^8.2.0",
     "chai": "^4.2.0",
     "got": "^11.1.4",
