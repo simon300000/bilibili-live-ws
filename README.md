@@ -208,8 +208,6 @@ WebSocket/TCP收到的Raw Buffer（不推荐直接使用）
 
 选一个cdn，Resolve host, address 和 key, 可以直接放进(Keep)LiveWS/TCP设置
 
-(需要安装 got `npm i -S got`)
-
 ```typescript
 const { getConf } = require('bilibili-live-ws')
 
@@ -225,8 +223,6 @@ Promise<{
 ### getRoomid(short)
 
 通过短房间号获取长房间号
-
-(需要安装 got)
 
 ```typescript
 const { getRoomid } = require('bilibili-live-ws')

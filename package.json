@@ -35,9 +35,6 @@
     "isomorphic-ws": "^5.0.0",
     "ws": "^8.2.3"
   },
-  "optionalDependencies": {
-    "got": "^11.1.4"
-  },
   "devDependencies": {
     "@types/chai": "^4.2.8",
     "@types/mocha": "^10.0.1",
@@ -45,7 +42,6 @@
     "@types/pako": "^2.0.0",
     "@types/ws": "^8.2.0",
     "chai": "^4.2.0",
-    "got": "^11.1.4",
     "mocha": "^10.2.0",
     "nyc": "^15.0.0",
     "ts-node": "^10.3.0",
