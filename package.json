@@ -32,7 +32,7 @@
   "homepage": "https://github.com/simon300000/bilibili-live-ws#readme",
   "dependencies": {
     "array-flat-polyfill": "^1.0.1",
-    "isomorphic-ws": "^4.0.1",
+    "isomorphic-ws": "^5.0.0",
     "ws": "^8.2.3"
   },
   "optionalDependencies": {
