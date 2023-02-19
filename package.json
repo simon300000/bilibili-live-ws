@@ -10,8 +10,7 @@
     "unit": "nyc mocha --reporter=landing -r ts-node/register test/test.ts",
     "clear": "rm index.js index.d.ts browser.js browser.d.ts src/*.js src/*.d.ts;exit 0",
     "tsc": "tsc -b",
-    "build": "npm run clear && npm run tsc",
-    "coverage": "mkdir coverage; nyc report --reporter=text-lcov >> ./coverage/lcov.info"
+    "build": "npm run clear && npm run tsc"
   },
   "repository": {
     "type": "git",
