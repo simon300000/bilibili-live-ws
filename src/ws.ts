@@ -12,14 +12,14 @@ export const isNode = !!IsomorphicWebSocket.Server
 class WebSocket extends EventEmitter {
   ws: IsomorphicWebSocket
 
-  constructor(address: string, ...args: any[]) {
+  constructor(address: string, inflates: Inflates, ...args: any[]) {
     super()
 
     const ws = new IsomorphicWebSocket(address, ...(isNode ? args : []))
     this.ws = ws
 
     ws.onopen = () => this.emit('open')
-    ws.onmessage = isNode ? ({ data }) => this.emit('message', data) : async ({ data }) => this.emit('message', Buffer.from(await new Response(data as unknown as InstanceType<typeof Blob>).arrayBuffer()))
+    ws.onmessage = isNode ? ({ data }) => this.emit('message', data) : async ({ data }) => this.emit('message', inflates.Buffer.from(await new Response(data as unknown as InstanceType<typeof Blob>).arrayBuffer()))
     ws.onerror = () => this.emit('error')
     ws.onclose = () => this.emit('close')
   }
@@ -41,7 +41,7 @@ export class LiveWSBase extends Live {
   ws: InstanceType<typeof WebSocket>
 
   constructor(inflates: Inflates, roomid: number, { address = 'wss://broadcastlv.chat.bilibili.com/sub', protover, key, agent, authBody }: WSOptions = {}) {
-    const ws = new WebSocket(address, { agent })
+    const ws = new WebSocket(address, inflates, { agent })
     const send = (data: Buffer) => {
       if (ws.readyState === 1) {
         ws.send(data)
