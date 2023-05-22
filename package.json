@@ -38,7 +38,7 @@
   "devDependencies": {
     "@types/chai": "^4.2.8",
     "@types/mocha": "^10.0.1",
-    "@types/node": "^18.14.0",
+    "@types/node": "^20.2.3",
     "@types/pako": "^2.0.0",
     "@types/ws": "^8.2.0",
     "chai": "^4.2.0",
