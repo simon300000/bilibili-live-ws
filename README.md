@@ -49,9 +49,9 @@ live.on('live', () => {
 
 (Keep)LiveWS 和 (Keep)LiveTCP 的大部分API基本上一样, 区别在本文末尾有注明
 
-### new LiveWS(roomid [, { address, protover, key }])
+### new LiveWS(roomid [, { address, protover, key, authBody }])
 
-### new LiveTCP(roomid [, { host, port, protover, key }])
+### new LiveTCP(roomid [, { host, port, protover, key, authBody }])
 
 - `roomid` 房间号
 
