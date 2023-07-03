@@ -83,7 +83,7 @@ live.on('live', () => {
 
 - `buvid` 可选, WS握手的 Token [#397](https://github.com/simon300000/bilibili-live-ws/issues/397)
 
-- `authBody` 可选, 可以和 <https://open-live.bilibili.com/document/> 配合使用, 会覆盖掉 `protover` `roomid` `key` `uid` `buvid`
+- `authBody` 可选, 可以和 <https://open-live.bilibili.com/document/> 配合使用, 会覆盖掉 `protover` `roomid` `key` `uid` `buvid`. 如果是 `object` 会按照握手包编码，如果是 `string`/`Buffer` 会直接发送
 
 #### live.on('open')
 
