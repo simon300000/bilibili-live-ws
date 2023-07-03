@@ -49,9 +49,9 @@ live.on('live', () => {
 
 (Keep)LiveWS 和 (Keep)LiveTCP 的大部分API基本上一样, 区别在本文末尾有注明
 
-### new LiveWS(roomid [, { address, protover, key, authBody }])
+### new LiveWS(roomid [, { address, protover, key, authBody, uid, buvid }])
 
-### new LiveTCP(roomid [, { host, port, protover, key, authBody }])
+### new LiveTCP(roomid [, { host, port, protover, key, authBody, uid, buvid }])
 
 - `roomid` 房间号
 
@@ -73,13 +73,17 @@ live.on('live', () => {
 
   默认 `2`
   
-  * 1 (见 #17)
+  * 1 (见 [#17](https://github.com/simon300000/bilibili-live-ws/issues/17))
   * 2 (zlib.inflate)
   * 3 (brotliDecompress)
   
-- `key` 可选, WS握手的Token
+- `uid` 可选, WS握手的 uid [#397](https://github.com/simon300000/bilibili-live-ws/issues/397)
 
-- `authBody` 可选, 可以和 <https://open-live.bilibili.com/document/> 配合使用, 会覆盖掉 `protover` `roomid` `key`
+- `key` 可选, WS握手的 Token [#397](https://github.com/simon300000/bilibili-live-ws/issues/397)
+
+- `buvid` 可选, WS握手的 Token [#397](https://github.com/simon300000/bilibili-live-ws/issues/397)
+
+- `authBody` 可选, 可以和 <https://open-live.bilibili.com/document/> 配合使用, 会覆盖掉 `protover` `roomid` `key` `uid` `buvid`
 
 #### live.on('open')
 

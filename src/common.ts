@@ -2,7 +2,7 @@ import { EventEmitter } from 'events'
 
 import { encoder, makeDecoder, Inflates } from './buffer'
 
-export type LiveOptions = { protover?: 1 | 2 | 3, key?: string, authBody?: any }
+export type LiveOptions = { protover?: 1 | 2 | 3, key?: string, authBody?: any, uid?: number, buvid?: string }
 
 export const relayEvent = Symbol('relay')
 
@@ -26,7 +26,7 @@ export class Live extends NiceEventEmitter {
   send: (data: Buffer) => void
   close: () => void
 
-  constructor(inflates: Inflates, roomid: number, { send, close, protover = 2, key, authBody }: { send: (data: Buffer) => void, close: () => void } & LiveOptions) {
+  constructor(inflates: Inflates, roomid: number, { send, close, protover = 2, key, authBody, uid = 0, buvid }: { send: (data: Buffer) => void, close: () => void } & LiveOptions) {
     if (typeof roomid !== 'number' || Number.isNaN(roomid)) {
       throw new Error(`roomid ${roomid} must be Number not NaN`)
     }
@@ -75,11 +75,17 @@ export class Live extends NiceEventEmitter {
 
     this.on('open', () => {
       if (authBody) {
+        if (typeof authBody === 'object') {
+          authBody = encoder('join', inflates, authBody)
+        }
         this.send(authBody)
       } else {
-        const hi: { uid: number, roomid: number, protover: number, platform: string, clientver: string, type: number, key?: string } = { uid: 0, roomid, protover, platform: 'web', clientver: '2.0.11', type: 2 }
+        const hi: { uid: number, roomid: number, protover: number, platform: string, type: number, key?: string, buvid?: string } = { uid: uid, roomid, protover, platform: 'web', type: 2 }
         if (key) {
           hi.key = key
+        }
+        if (buvid) {
+          hi.buvid = buvid
         }
         const buf = encoder('join', inflates, hi)
         this.send(buf)

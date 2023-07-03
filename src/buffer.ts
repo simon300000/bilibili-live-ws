@@ -60,7 +60,9 @@ export const makeDecoder = ({ inflateAsync, brotliDecompressAsync }: Inflates) =
   return decoder
 }
 
-export const encoder = (type: string, { Buffer }: Inflates, body: any = '') => {
+type EncodeType = 'heartbeat' | 'join'
+
+export const encoder = (type: EncodeType, { Buffer }: Inflates, body: any = '') => {
   const blank = Buffer.alloc(16)
   if (typeof body !== 'string') {
     body = JSON.stringify(body)
