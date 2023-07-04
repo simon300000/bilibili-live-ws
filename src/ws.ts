@@ -40,7 +40,7 @@ class WebSocket extends EventEmitter {
 export class LiveWSBase extends Live {
   ws: InstanceType<typeof WebSocket>
 
-  constructor(inflates: Inflates, roomid: number, { address = 'wss://broadcastlv.chat.bilibili.com/sub', protover, key, agent, authBody }: WSOptions = {}) {
+  constructor(inflates: Inflates, roomid: number, { address = 'wss://broadcastlv.chat.bilibili.com/sub', agent, ...options }: WSOptions = {}) {
     const ws = new WebSocket(address, inflates, { agent })
     const send = (data: Buffer) => {
       if (ws.readyState === 1) {
@@ -49,7 +49,7 @@ export class LiveWSBase extends Live {
     }
     const close = () => this.ws.close()
 
-    super(inflates, roomid, { send, close, protover, key, authBody })
+    super(inflates, roomid, { send, close, ...options })
 
     ws.on('open', (...params) => this.emit('open', ...params))
     ws.on('message', data => this.emit('message', data as Buffer))
