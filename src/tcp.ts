@@ -10,14 +10,14 @@ export class LiveTCPBase extends Live {
   buffer: Buffer
   i: number
 
-  constructor(inflates: Inflates, roomid: number, { host = 'broadcastlv.chat.bilibili.com', port = 2243, protover, key, authBody }: TCPOptions = {}) {
+  constructor(inflates: Inflates, roomid: number, { host = 'broadcastlv.chat.bilibili.com', port = 2243, protover, key, authBody, uid, buvid }: TCPOptions = {}) {
     const socket = net.connect(port, host)
     const send = (data: Buffer) => {
       socket.write(data)
     }
     const close = () => this.socket.end()
 
-    super(inflates, roomid, { send, close, protover, key, authBody })
+    super(inflates, roomid, { send, close, protover, key, authBody, uid, buvid })
 
     this.i = 0
     this.buffer = Buffer.alloc(0)
