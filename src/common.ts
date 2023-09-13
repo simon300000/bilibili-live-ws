@@ -26,7 +26,7 @@ export class Live extends NiceEventEmitter {
   send: (data: Buffer) => void
   close: () => void
 
-  constructor(inflates: Inflates, roomid: number, { send, close, protover = 2, key, authBody, uid = 0, buvid }: { send: (data: Buffer) => void, close: () => void } & LiveOptions) {
+  constructor(inflates: Inflates, roomid: number, { send, close, protover = 3, key, authBody, uid = 0, buvid }: { send: (data: Buffer) => void, close: () => void } & LiveOptions) {
     if (typeof roomid !== 'number' || Number.isNaN(roomid)) {
       throw new Error(`roomid ${roomid} must be Number not NaN`)
     }
